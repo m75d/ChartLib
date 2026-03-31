@@ -14,4 +14,3 @@ def save_png(image: np.ndarray, path: str | Path) -> None:
     output_path = Path(path)
     image_to_save = np.asarray(image, dtype=np.uint8)
     Image.fromarray(image_to_save).save(output_path, format="PNG")
-

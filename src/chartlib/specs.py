@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 import numpy as np
-from calcharts.utils.validation import (
+from chartlib.utils.validation import (
     normalize_color,
     validate_channels,
     validate_positive_int,

@@ -7,11 +7,11 @@ from pathlib import Path
 
 import numpy as np
 
-from calcharts.annotations import AnnotationBundle
-from calcharts.renderers.raster import RasterRectangle, render_rectangles
-from calcharts.specs import CanvasSpec, RenderOptions
-from calcharts.utils.image import save_png
-from calcharts.utils.validation import (
+from chartlib.annotations import AnnotationBundle
+from chartlib.renderers.raster import RasterRectangle, render_rectangles
+from chartlib.specs import CanvasSpec, RenderOptions
+from chartlib.utils.image import save_png
+from chartlib.utils.validation import (
     validate_non_negative_int,
     validate_positive_int,
 )
@@ -130,4 +130,3 @@ class CheckerboardChart:
             (self.canvas.width - chart_width) // 2,
             (self.canvas.height - chart_height) // 2,
         )
-

@@ -6,8 +6,8 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from calcharts.specs import CanvasSpec, RenderOptions
-from calcharts.utils.validation import normalize_color, validate_positive_int
+from chartlib.specs import CanvasSpec, RenderOptions
+from chartlib.utils.validation import normalize_color, validate_positive_int
 
 
 @dataclass(frozen=True)

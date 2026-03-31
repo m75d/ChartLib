@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from calcharts import CanvasSpec, CheckerboardChart, RenderOptions
+from chartlib import CanvasSpec, CheckerboardChart, RenderOptions
 
 
 def test_checkerboard_output_image_shape() -> None:

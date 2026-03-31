@@ -59,4 +59,3 @@ def _normalize_channel(value: int | float, name: str) -> int:
         return int(round(value * 255))
 
     raise ValueError(f"{name} must be an int, float, or tuple of channel values.")
-
