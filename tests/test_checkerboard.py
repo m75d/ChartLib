@@ -47,7 +47,7 @@ def test_checkerboard_alternates_black_and_white() -> None:
     np.testing.assert_array_equal(sampled, expected)
 
 
-def test_checkerboard_annotation_count_and_sanity(tmp_path: Path) -> None:
+def test_checkerboard_annotation_count_and_sanity() -> None:
     canvas = CanvasSpec(width=140, height=120, channels=1, background=255)
     chart = CheckerboardChart(
         canvas=canvas,
@@ -58,7 +58,9 @@ def test_checkerboard_annotation_count_and_sanity(tmp_path: Path) -> None:
     )
 
     image, annotations = chart.render(return_annotations=True)
-    saved_annotations = chart.save(tmp_path / "checkerboard.png", return_annotations=True)
+    output_dir = Path("tests") / "_artifacts"
+    output_dir.mkdir(exist_ok=True)
+    saved_annotations = chart.save(output_dir / "checkerboard.png", return_annotations=True)
 
     assert image.shape == (120, 140)
     assert saved_annotations == annotations
