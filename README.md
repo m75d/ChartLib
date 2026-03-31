@@ -17,7 +17,7 @@ pip install -e .[dev]
 ## Example
 
 ```python
-from calcharts import CanvasSpec, CheckerboardChart
+from chartlib import CanvasSpec, CheckerboardChart
 
 canvas = CanvasSpec(width=320, height=240, channels=1, background=255)
 chart = CheckerboardChart(canvas=canvas, rows=4, cols=5, square_size=40)
@@ -28,7 +28,7 @@ chart.save("checkerboard.png")
 
 ## Included in this milestone
 
-- package skeleton under `src/calcharts`
+- package skeleton under `src/chartlib`
 - project configuration via `pyproject.toml`
 - `CanvasSpec`
 - `RenderOptions`
