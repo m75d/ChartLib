@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
 
 import numpy as np
 from calcharts.utils.validation import (
@@ -11,9 +10,6 @@ from calcharts.utils.validation import (
     validate_channels,
     validate_positive_int,
 )
-
-if TYPE_CHECKING:
-    from typing import Any
 
 
 @dataclass(frozen=True)
@@ -34,6 +30,10 @@ class CanvasSpec:
 
 @dataclass(frozen=True)
 class RenderOptions:
-    """Rendering policy for array creation and file output."""
+    """Rendering policy for V1 8-bit raster output."""
 
-    dtype: type[Any] = np.uint8
+    dtype: type = np.uint8
+
+    def __post_init__(self) -> None:
+        if self.dtype is not np.uint8:
+            raise ValueError("RenderOptions.dtype currently supports only numpy.uint8 in V1.")
