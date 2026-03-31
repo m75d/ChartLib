@@ -34,11 +34,12 @@ def render_rectangles(
 
     render_options = options or RenderOptions()
     background = normalize_color(canvas.background, canvas.channels, "background")
+    dtype = render_options.dtype
 
     if canvas.channels == 1:
-        image = np.full((canvas.height, canvas.width), background[0], dtype=np.uint8)
+        image = np.full((canvas.height, canvas.width), background[0], dtype=dtype)
     else:
-        image = np.full((canvas.height, canvas.width, canvas.channels), background, dtype=np.uint8)
+        image = np.full((canvas.height, canvas.width, canvas.channels), background, dtype=dtype)
 
     for rectangle in rectangles:
         color = normalize_color(rectangle.color, canvas.channels, "rectangle.color")
@@ -52,5 +53,4 @@ def render_rectangles(
         else:
             image[y0:y1, x0:x1] = color
 
-    return image.astype(render_options.dtype, copy=False)
-
+    return image
