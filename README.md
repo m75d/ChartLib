@@ -1,6 +1,12 @@
 # ChartLib
 
-ChartLib currently implements the first V1 milestone: a minimal, typed Python package that can render an ideal checkerboard chart to a NumPy array, save it as PNG, and return checkerboard corner annotations.
+ChartLib is a typed Python library for generating ideal 2D calibration and reference charts as NumPy arrays, with PNG export and structured annotations.
+
+The current repository state implements a small V1 foundation with these built-in chart types:
+
+- `CheckerboardChart`
+- `CircleGridChart`
+- `GrayscaleStepChart`
 
 ## Install
 
@@ -17,23 +23,29 @@ pip install -e .[dev]
 ## Example
 
 ```python
-from chartlib import CanvasSpec, CheckerboardChart
+from chartlib import CanvasSpec, CheckerboardChart, CircleGridChart, GrayscaleStepChart
 
 canvas = CanvasSpec(width=320, height=240, channels=1, background=255)
-chart = CheckerboardChart(canvas=canvas, rows=4, cols=5, square_size=40)
+checkerboard = CheckerboardChart(canvas=canvas, rows=4, cols=5, square_size=40)
+circle_grid = CircleGridChart(canvas=canvas, rows=3, cols=4, radius=10, spacing=30)
+steps = GrayscaleStepChart(canvas=canvas, steps=5, step_size=(20, 60))
 
-image, annotations = chart.render(return_annotations=True)
-chart.save("checkerboard.png")
+image, annotations = checkerboard.render(return_annotations=True)
+circle_grid.save("circle-grid.png")
+steps.save("grayscale-step.png")
 ```
 
-## Included in this milestone
+## Current Scope
 
 - package skeleton under `src/chartlib`
 - project configuration via `pyproject.toml`
 - `CanvasSpec`
 - `RenderOptions`
 - basic validation helpers
-- minimal raster rendering for rectangles
+- raster rendering for filled rectangles and circles
 - `CheckerboardChart`
-- checkerboard corner annotations
-- pytest coverage for the first vertical slice
+- `CircleGridChart`
+- `GrayscaleStepChart`
+- structured annotations for corners, centers, and step regions
+- PNG export
+- pytest coverage for the implemented V1 slices
