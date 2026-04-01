@@ -2,6 +2,7 @@
 
 from chartlib.annotations import AnnotationBundle
 from chartlib.charts.circle_grid import CircleGridChart
+from chartlib.charts.grayscale import GrayscaleStepChart
 from chartlib.charts.checkerboard import CheckerboardChart
 from chartlib.specs import CanvasSpec, RenderOptions
 
@@ -10,5 +11,6 @@ __all__ = [
     "CanvasSpec",
     "CircleGridChart",
     "CheckerboardChart",
+    "GrayscaleStepChart",
     "RenderOptions",
 ]

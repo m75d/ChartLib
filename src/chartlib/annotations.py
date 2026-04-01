@@ -12,3 +12,4 @@ class AnnotationBundle:
     chart_type: str
     image_size: tuple[int, int]
     landmarks: dict[str, list[tuple[float, float]]] = field(default_factory=dict)
+    regions: dict[str, list[dict[str, object]]] = field(default_factory=dict)
