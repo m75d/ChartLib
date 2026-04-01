@@ -4,3 +4,5 @@ _artifacts
 .pytest_cache/
 artifacts/
 *chartlib.egg-info/
+.idea/
+sandbox.py
