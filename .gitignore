@@ -3,3 +3,4 @@ __pycache__/
 _artifacts
 .pytest_cache/
 artifacts/
+*chartlib.egg-info/
