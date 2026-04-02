@@ -6,6 +6,7 @@ The current repository state implements a small V1 foundation with these built-i
 
 - `CheckerboardChart`
 - `CircleGridChart`
+- `CompositeChart`
 - `ColorPatchChart`
 - `DeadLeavesPatchChart`
 - `GrayscaleStepChart`
@@ -32,12 +33,14 @@ from chartlib import (
     CanvasSpec,
     CheckerboardChart,
     CircleGridChart,
+    CompositeChart,
     ColorPatchChart,
     DeadLeavesPatchChart,
     GrayscaleStepChart,
     RegistrationMarkerChart,
     SiemensStarChart,
     SlantedEdgeChart,
+    PlacedChart,
 )
 
 canvas = CanvasSpec(width=320, height=240, channels=1, background=255)
@@ -49,6 +52,13 @@ markers = RegistrationMarkerChart(canvas=canvas, marker_size=12)
 steps = GrayscaleStepChart(canvas=canvas, steps=5, step_size=(20, 60))
 star = SiemensStarChart(canvas=canvas, outer_radius=90, num_sectors=32)
 slanted = SlantedEdgeChart(canvas=canvas, chart_size=(120, 80), edge_angle_degrees=5.0)
+composite = CompositeChart(
+    canvas=CanvasSpec(width=320, height=240, channels=1, background=255),
+    elements=[
+        PlacedChart(name="checker", chart=CheckerboardChart(canvas=CanvasSpec(width=80, height=80, channels=1, background=255), rows=4, cols=4, square_size=20, origin=(0, 0)), origin=(20, 20)),
+        PlacedChart(name="markers", chart=RegistrationMarkerChart(canvas=CanvasSpec(width=36, height=36, channels=1, background=255), marker_size=12), origin=(220, 20)),
+    ],
+)
 
 image, annotations = checkerboard.render(return_annotations=True)
 circle_grid.save("circle-grid.png")
@@ -58,6 +68,7 @@ markers.save("registration-markers.png")
 steps.save("grayscale-step.png")
 star.save("siemens-star.png")
 slanted.save("slanted-edge.png")
+composite.save("composite.png")
 ```
 
 ## Current Scope
@@ -70,6 +81,7 @@ slanted.save("slanted-edge.png")
 - raster rendering for filled rectangles and circles
 - `CheckerboardChart`
 - `CircleGridChart`
+- `CompositeChart`
 - `ColorPatchChart`
 - `DeadLeavesPatchChart`
 - `GrayscaleStepChart`
@@ -77,6 +89,7 @@ slanted.save("slanted-edge.png")
 - `SiemensStarChart`
 - `SlantedEdgeChart`
 - structured annotations for corners, centers, and patch/step regions
+- grouped translated annotations for composite layout elements
 - structured annotations for dead-leaves patch parameters
 - structured annotations for registration-marker centers and regions
 - structured annotations for Siemens-star center and geometry

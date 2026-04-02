@@ -2,6 +2,7 @@
 
 from chartlib.annotations import AnnotationBundle
 from chartlib.charts.circle_grid import CircleGridChart
+from chartlib.charts.composite import CompositeChart, PlacedChart
 from chartlib.charts.color_patch import ColorPatchChart
 from chartlib.charts.dead_leaves import DeadLeavesPatchChart
 from chartlib.charts.grayscale import GrayscaleStepChart
@@ -15,10 +16,12 @@ __all__ = [
     "AnnotationBundle",
     "CanvasSpec",
     "CircleGridChart",
+    "CompositeChart",
     "ColorPatchChart",
     "DeadLeavesPatchChart",
     "CheckerboardChart",
     "GrayscaleStepChart",
+    "PlacedChart",
     "RegistrationMarkerChart",
     "SiemensStarChart",
     "SlantedEdgeChart",
