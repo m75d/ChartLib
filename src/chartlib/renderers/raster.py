@@ -1,4 +1,4 @@
-"""Minimal raster rendering for rectangle- and circle-based charts."""
+"""Minimal raster rendering for rectangle-, circle-, and slanted-edge charts."""
 
 from __future__ import annotations
 
@@ -93,5 +93,55 @@ def render_primitives(
             image[y0:y1, x0:x1][mask] = color[0]
         else:
             image[y0:y1, x0:x1][mask] = color
+
+    return image
+
+
+def render_slanted_edge_region(
+    canvas: CanvasSpec,
+    chart_x: int,
+    chart_y: int,
+    chart_width: int,
+    chart_height: int,
+    edge_angle_degrees: float,
+    dark_value: int | float | tuple[int | float, ...],
+    light_value: int | float | tuple[int | float, ...],
+    background_value: int | float | tuple[int | float, ...] | None = None,
+    options: RenderOptions | None = None,
+) -> np.ndarray:
+    """Render a rectangular chart region split by a single slanted edge."""
+
+    render_options = options or RenderOptions()
+    fill_value = canvas.background if background_value is None else background_value
+    background = normalize_color(fill_value, canvas.channels, "background")
+    dark = normalize_color(dark_value, canvas.channels, "dark_value")
+    light = normalize_color(light_value, canvas.channels, "light_value")
+    dtype = render_options.dtype
+
+    if canvas.channels == 1:
+        image = np.full((canvas.height, canvas.width), background[0], dtype=dtype)
+    else:
+        image = np.full((canvas.height, canvas.width, canvas.channels), background, dtype=dtype)
+
+    theta = np.deg2rad(edge_angle_degrees)
+    direction_x = np.sin(theta)
+    direction_y = np.cos(theta)
+    center_x = chart_x + chart_width / 2.0
+    center_y = chart_y + chart_height / 2.0
+
+    yy, xx = np.ogrid[chart_y:chart_y + chart_height, chart_x:chart_x + chart_width]
+    x_centers = xx + 0.5
+    y_centers = yy + 0.5
+    signed = direction_y * (x_centers - center_x) - direction_x * (y_centers - center_y)
+    dark_mask = signed < 0
+
+    if canvas.channels == 1:
+        region = image[chart_y:chart_y + chart_height, chart_x:chart_x + chart_width]
+        region[:] = light[0]
+        region[dark_mask] = dark[0]
+    else:
+        region = image[chart_y:chart_y + chart_height, chart_x:chart_x + chart_width]
+        region[:] = light
+        region[dark_mask] = dark
 
     return image
