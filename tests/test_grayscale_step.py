@@ -64,6 +64,7 @@ def test_grayscale_step_annotations_include_centers_and_regions(tmp_path: Path) 
     assert centers[0] == (30.0, 35.0)
     assert centers[-1] == (90.0, 35.0)
     assert regions[1] == {
+        "type": "rectangle",
         "index": 1,
         "value": 120,
         "x": 45,

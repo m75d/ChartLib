@@ -9,7 +9,7 @@ import math
 import numbers
 import numpy as np
 
-from chartlib.annotations import AnnotationBundle
+from chartlib.annotations import AnnotationBundle, line_region, rectangle_region
 from chartlib.renderers.raster import render_slanted_edge_region
 from chartlib.specs import CanvasSpec, RenderOptions
 from chartlib.utils.image import save_png
@@ -106,21 +106,22 @@ class SlantedEdgeChart:
             },
             regions={
                 "chart": [
-                    {
-                        "x": origin_x,
-                        "y": origin_y,
-                        "width": chart_width,
-                        "height": chart_height,
-                    }
+                    rectangle_region(
+                        "rectangle",
+                        x=origin_x,
+                        y=origin_y,
+                        width=chart_width,
+                        height=chart_height,
+                    )
                 ],
                 "edge": [
-                    {
-                        "angle_degrees": float(self.edge_angle_degrees),
-                        "x0": point_a[0],
-                        "y0": point_a[1],
-                        "x1": point_b[0],
-                        "y1": point_b[1],
-                    }
+                    line_region(
+                        point_a[0],
+                        point_a[1],
+                        point_b[0],
+                        point_b[1],
+                        angle_degrees=float(self.edge_angle_degrees),
+                    )
                 ],
             },
         )

@@ -60,8 +60,13 @@ def test_slanted_edge_annotations_include_chart_and_edge_geometry(tmp_path: Path
 
     assert len(edge_segment) == 2
     assert edge_center == [(60.0, 50.0)]
-    assert chart_region == {"x": 20, "y": 25, "width": 80, "height": 50}
+    assert chart_region == {"type": "rectangle", "x": 20, "y": 25, "width": 80, "height": 50}
+    assert edge_region["type"] == "line_segment"
     assert edge_region["angle_degrees"] == 5.0
+    assert edge_region["x"] == min(edge_region["x0"], edge_region["x1"])
+    assert edge_region["y"] == min(edge_region["y0"], edge_region["y1"])
+    assert edge_region["width"] == abs(edge_region["x1"] - edge_region["x0"])
+    assert edge_region["height"] == abs(edge_region["y1"] - edge_region["y0"])
     assert edge_segment[0][1] <= edge_segment[1][1]
 
 
