@@ -49,8 +49,11 @@ class CompositeChart:
             seen_names.add(name)
 
             child_canvas = self._child_canvas(element.chart)
-            if child_canvas.channels != self.canvas.channels:
-                raise ValueError("All placed charts must use the same channel count as the composite canvas.")
+            if not self._is_compatible_child_canvas(child_canvas):
+                raise ValueError(
+                    "Placed charts must use the same channel count as the composite canvas, "
+                    "except grayscale charts may be placed on RGB composite canvases."
+                )
 
             origin_x, origin_y = element.origin
             if origin_x + child_canvas.width > self.canvas.width or origin_y + child_canvas.height > self.canvas.height:
@@ -75,7 +78,7 @@ class CompositeChart:
             image = np.full((self.canvas.height, self.canvas.width, self.canvas.channels), background, dtype=dtype)
 
         for element in self.elements:
-            child_image = element.chart.render(options=render_options)
+            child_image = self._render_child_image(element.chart, render_options)
             origin_x, origin_y = element.origin
             child_canvas = self._child_canvas(element.chart)
             image[
@@ -130,6 +133,23 @@ class CompositeChart:
         if not isinstance(child_canvas, CanvasSpec):
             raise ValueError("Placed charts must expose a CanvasSpec via the 'canvas' attribute.")
         return child_canvas
+
+    def _is_compatible_child_canvas(self, child_canvas: CanvasSpec) -> bool:
+        if child_canvas.channels == self.canvas.channels:
+            return True
+        return self.canvas.channels == 3 and child_canvas.channels == 1
+
+    def _render_child_image(self, chart: object, options: RenderOptions) -> np.ndarray:
+        child_image = chart.render(options=options)
+        child_canvas = self._child_canvas(chart)
+
+        if child_canvas.channels == self.canvas.channels:
+            return child_image
+
+        if self.canvas.channels == 3 and child_canvas.channels == 1:
+            return np.repeat(child_image[:, :, None], 3, axis=2)
+
+        raise ValueError("Unsupported composite channel conversion.")
 
     def _translate_landmarks(
         self,

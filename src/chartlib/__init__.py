@@ -10,6 +10,7 @@ from chartlib.charts.checkerboard import CheckerboardChart
 from chartlib.charts.registration_marker import RegistrationMarkerChart
 from chartlib.charts.siemens_star import SiemensStarChart
 from chartlib.charts.slanted_edge import SlantedEdgeChart
+from chartlib.presets import TE42LikePreset
 from chartlib.specs import CanvasSpec, RenderOptions
 
 __all__ = [
@@ -25,5 +26,6 @@ __all__ = [
     "RegistrationMarkerChart",
     "SiemensStarChart",
     "SlantedEdgeChart",
+    "TE42LikePreset",
     "RenderOptions",
 ]
