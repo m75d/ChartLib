@@ -4,12 +4,14 @@ import chartlib
 from chartlib import (
     CircleGridChart,
     CheckerboardChart,
+    ColorPatchChart,
     GrayscaleStepChart,
     SiemensStarChart,
     SlantedEdgeChart,
 )
 from chartlib.charts import CheckerboardChart as ChartsCheckerboardChart
 from chartlib.charts import CircleGridChart as ChartsCircleGridChart
+from chartlib.charts import ColorPatchChart as ChartsColorPatchChart
 from chartlib.charts import GrayscaleStepChart as ChartsGrayscaleStepChart
 from chartlib.charts import SiemensStarChart as ChartsSiemensStarChart
 from chartlib.charts import SlantedEdgeChart as ChartsSlantedEdgeChart
@@ -18,11 +20,13 @@ from chartlib.charts import SlantedEdgeChart as ChartsSlantedEdgeChart
 def test_chartlib_top_level_exports_builtin_chart_classes() -> None:
     assert "CheckerboardChart" in chartlib.__all__
     assert "CircleGridChart" in chartlib.__all__
+    assert "ColorPatchChart" in chartlib.__all__
     assert "GrayscaleStepChart" in chartlib.__all__
     assert "SiemensStarChart" in chartlib.__all__
     assert "SlantedEdgeChart" in chartlib.__all__
     assert chartlib.CheckerboardChart is CheckerboardChart
     assert chartlib.CircleGridChart is CircleGridChart
+    assert chartlib.ColorPatchChart is ColorPatchChart
     assert chartlib.GrayscaleStepChart is GrayscaleStepChart
     assert chartlib.SiemensStarChart is SiemensStarChart
     assert chartlib.SlantedEdgeChart is SlantedEdgeChart
@@ -31,6 +35,7 @@ def test_chartlib_top_level_exports_builtin_chart_classes() -> None:
 def test_chartlib_charts_exports_builtin_chart_classes() -> None:
     assert ChartsCheckerboardChart is CheckerboardChart
     assert ChartsCircleGridChart is CircleGridChart
+    assert ChartsColorPatchChart is ColorPatchChart
     assert ChartsGrayscaleStepChart is GrayscaleStepChart
     assert ChartsSiemensStarChart is SiemensStarChart
     assert ChartsSlantedEdgeChart is SlantedEdgeChart
