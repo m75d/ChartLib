@@ -2,6 +2,7 @@
 
 from chartlib.charts.circle_grid import CircleGridChart
 from chartlib.charts.color_patch import ColorPatchChart
+from chartlib.charts.dead_leaves import DeadLeavesPatchChart
 from chartlib.charts.checkerboard import CheckerboardChart
 from chartlib.charts.grayscale import GrayscaleStepChart
 from chartlib.charts.siemens_star import SiemensStarChart
@@ -11,6 +12,7 @@ __all__ = [
     "CheckerboardChart",
     "CircleGridChart",
     "ColorPatchChart",
+    "DeadLeavesPatchChart",
     "GrayscaleStepChart",
     "SiemensStarChart",
     "SlantedEdgeChart",
