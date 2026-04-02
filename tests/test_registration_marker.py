@@ -1,0 +1,146 @@
+from __future__ import annotations
+
+from pathlib import Path
+
+import numpy as np
+import pytest
+
+from chartlib import CanvasSpec, RegistrationMarkerChart
+
+
+def test_registration_marker_output_image_shape() -> None:
+    canvas = CanvasSpec(width=120, height=90, channels=1, background=255)
+    chart = RegistrationMarkerChart(
+        canvas=canvas,
+        marker_size=10,
+        marker_positions=[(10, 10), (30, 20)],
+        origin=(10, 15),
+        layout_size=(40, 30),
+    )
+
+    image = chart.render()
+
+    assert image.shape == (90, 120)
+
+
+def test_registration_marker_square_placement_sanity() -> None:
+    canvas = CanvasSpec(width=100, height=80, channels=1, background=255)
+    chart = RegistrationMarkerChart(
+        canvas=canvas,
+        marker_size=8,
+        marker_positions=[(10, 10)],
+        origin=(20, 15),
+        layout_size=(30, 30),
+    )
+
+    image = chart.render()
+
+    assert image[25, 30] == 0
+    assert image[15, 20] == 255
+
+
+def test_registration_marker_cross_shape_sanity() -> None:
+    canvas = CanvasSpec(width=100, height=80, channels=1, background=255)
+    chart = RegistrationMarkerChart(
+        canvas=canvas,
+        marker_size=8,
+        marker_shape="cross",
+        marker_positions=[(10, 10)],
+        origin=(20, 15),
+        layout_size=(30, 30),
+    )
+
+    image = chart.render()
+
+    assert image[25, 30] == 0
+    assert image[21, 26] == 255
+
+
+def test_registration_marker_annotations_and_save(tmp_path: Path) -> None:
+    canvas = CanvasSpec(width=160, height=120, channels=1, background=255)
+    chart = RegistrationMarkerChart(
+        canvas=canvas,
+        marker_size=10,
+        marker_shape="square",
+        marker_positions=[(10, 10), (30, 20), (45, 35)],
+        origin=(15, 25),
+        layout_size=(60, 50),
+        background_value=240,
+    )
+
+    image, annotations = chart.render(return_annotations=True)
+    output_path = tmp_path / "registration-marker.png"
+    saved_annotations = chart.save(output_path, return_annotations=True)
+
+    assert image.shape == (120, 160)
+    assert output_path.exists()
+    assert saved_annotations == annotations
+    assert len(annotations.landmarks["centers"]) == 3
+    assert annotations.landmarks["centers"][0] == (25.0, 35.0)
+    assert annotations.regions["markers"][1] == {
+        "type": "rectangle",
+        "x": 40,
+        "y": 40,
+        "width": 10,
+        "height": 10,
+        "index": 1,
+        "shape": "square",
+        "center_x": 45,
+        "center_y": 45,
+    }
+
+
+def test_registration_marker_uses_centered_origin_by_default() -> None:
+    canvas = CanvasSpec(width=100, height=80, channels=1, background=255)
+    chart = RegistrationMarkerChart(
+        canvas=canvas,
+        marker_size=10,
+        marker_positions=[(5, 5), (25, 25)],
+        layout_size=(30, 30),
+    )
+
+    image = chart.render()
+
+    assert tuple(chart.get_annotations().landmarks["centers"][0]) == (40.0, 30.0)
+    assert image[30, 40] == 0
+
+
+def test_registration_marker_raises_when_layout_exceeds_canvas() -> None:
+    canvas = CanvasSpec(width=40, height=40, channels=1, background=255)
+
+    with pytest.raises(ValueError, match="does not fit inside the canvas"):
+        RegistrationMarkerChart(
+            canvas=canvas,
+            marker_size=10,
+            layout_size=(50, 20),
+        )
+
+
+def test_registration_marker_rejects_non_grayscale_canvas() -> None:
+    canvas = CanvasSpec(width=100, height=80, channels=3, background=(255, 255, 255))
+
+    with pytest.raises(ValueError, match="requires a grayscale canvas"):
+        RegistrationMarkerChart(
+            canvas=canvas,
+            marker_size=10,
+        )
+
+
+def test_registration_marker_rejects_unsupported_shape() -> None:
+    canvas = CanvasSpec(width=100, height=80, channels=1, background=255)
+
+    with pytest.raises(ValueError, match="marker_shape must be 'square' or 'cross'"):
+        RegistrationMarkerChart(
+            canvas=canvas,
+            marker_size=10,
+            marker_shape="circle",
+        )
+
+
+def test_registration_marker_default_layout_is_deterministic() -> None:
+    canvas = CanvasSpec(width=100, height=100, channels=1, background=255)
+    chart_a = RegistrationMarkerChart(canvas=canvas, marker_size=10)
+    chart_b = RegistrationMarkerChart(canvas=canvas, marker_size=10)
+
+    np.testing.assert_array_equal(chart_a.render(), chart_b.render())
+    assert chart_a.get_annotations() == chart_b.get_annotations()
