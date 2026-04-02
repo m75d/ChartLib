@@ -204,3 +204,47 @@ def render_siemens_star(
             region[inner_mask] = hole
 
     return image
+
+
+def render_circles_in_rectangle(
+    canvas: CanvasSpec,
+    rect_x: int,
+    rect_y: int,
+    rect_width: int,
+    rect_height: int,
+    circles: list[RasterCircle],
+    background_value: int | float | tuple[int | float, ...] | None = None,
+    options: RenderOptions | None = None,
+) -> np.ndarray:
+    """Render circles clipped to a rectangular region on the canvas."""
+
+    image = render_primitives(canvas=canvas, options=options)
+    fill = canvas.background if background_value is None else background_value
+    background = normalize_color(fill, canvas.channels, "background_value")
+    y1 = rect_y + rect_height
+    x1 = rect_x + rect_width
+
+    if canvas.channels == 1:
+        image[rect_y:y1, rect_x:x1] = background[0]
+    else:
+        image[rect_y:y1, rect_x:x1] = background
+
+    for circle in circles:
+        color = normalize_color(circle.color, canvas.channels, "circle.color")
+        y0 = max(rect_y, circle.center_y - circle.radius)
+        y1_circle = min(rect_y + rect_height, circle.center_y + circle.radius + 1)
+        x0 = max(rect_x, circle.center_x - circle.radius)
+        x1_circle = min(rect_x + rect_width, circle.center_x + circle.radius + 1)
+
+        if y0 >= y1_circle or x0 >= x1_circle:
+            continue
+
+        yy, xx = np.ogrid[y0:y1_circle, x0:x1_circle]
+        mask = (xx - circle.center_x) ** 2 + (yy - circle.center_y) ** 2 <= circle.radius**2
+
+        if canvas.channels == 1:
+            image[y0:y1_circle, x0:x1_circle][mask] = color[0]
+        else:
+            image[y0:y1_circle, x0:x1_circle][mask] = color
+
+    return image
