@@ -9,6 +9,7 @@ The current repository state implements a small V1 foundation with these built-i
 - `ColorPatchChart`
 - `DeadLeavesPatchChart`
 - `GrayscaleStepChart`
+- `RegistrationMarkerChart`
 - `SiemensStarChart`
 - `SlantedEdgeChart`
 
@@ -34,6 +35,7 @@ from chartlib import (
     ColorPatchChart,
     DeadLeavesPatchChart,
     GrayscaleStepChart,
+    RegistrationMarkerChart,
     SiemensStarChart,
     SlantedEdgeChart,
 )
@@ -43,6 +45,7 @@ checkerboard = CheckerboardChart(canvas=canvas, rows=4, cols=5, square_size=40)
 circle_grid = CircleGridChart(canvas=canvas, rows=3, cols=4, radius=10, spacing=30)
 patches = ColorPatchChart(canvas=CanvasSpec(width=320, height=240, channels=3, background=(255, 255, 255)), rows=2, cols=3, patch_size=(30, 30))
 dead_leaves = DeadLeavesPatchChart(canvas=canvas, patch_size=(80, 80), num_shapes=150, seed=0)
+markers = RegistrationMarkerChart(canvas=canvas, marker_size=12)
 steps = GrayscaleStepChart(canvas=canvas, steps=5, step_size=(20, 60))
 star = SiemensStarChart(canvas=canvas, outer_radius=90, num_sectors=32)
 slanted = SlantedEdgeChart(canvas=canvas, chart_size=(120, 80), edge_angle_degrees=5.0)
@@ -51,6 +54,7 @@ image, annotations = checkerboard.render(return_annotations=True)
 circle_grid.save("circle-grid.png")
 patches.save("color-patches.png")
 dead_leaves.save("dead-leaves.png")
+markers.save("registration-markers.png")
 steps.save("grayscale-step.png")
 star.save("siemens-star.png")
 slanted.save("slanted-edge.png")
@@ -69,10 +73,12 @@ slanted.save("slanted-edge.png")
 - `ColorPatchChart`
 - `DeadLeavesPatchChart`
 - `GrayscaleStepChart`
+- `RegistrationMarkerChart`
 - `SiemensStarChart`
 - `SlantedEdgeChart`
 - structured annotations for corners, centers, and patch/step regions
 - structured annotations for dead-leaves patch parameters
+- structured annotations for registration-marker centers and regions
 - structured annotations for Siemens-star center and geometry
 - structured annotations for slanted-edge geometry
 - PNG export

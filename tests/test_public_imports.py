@@ -7,6 +7,7 @@ from chartlib import (
     CheckerboardChart,
     ColorPatchChart,
     GrayscaleStepChart,
+    RegistrationMarkerChart,
     SiemensStarChart,
     SlantedEdgeChart,
 )
@@ -15,6 +16,7 @@ from chartlib.charts import CircleGridChart as ChartsCircleGridChart
 from chartlib.charts import ColorPatchChart as ChartsColorPatchChart
 from chartlib.charts import DeadLeavesPatchChart as ChartsDeadLeavesPatchChart
 from chartlib.charts import GrayscaleStepChart as ChartsGrayscaleStepChart
+from chartlib.charts import RegistrationMarkerChart as ChartsRegistrationMarkerChart
 from chartlib.charts import SiemensStarChart as ChartsSiemensStarChart
 from chartlib.charts import SlantedEdgeChart as ChartsSlantedEdgeChart
 
@@ -25,6 +27,7 @@ def test_chartlib_top_level_exports_builtin_chart_classes() -> None:
     assert "ColorPatchChart" in chartlib.__all__
     assert "DeadLeavesPatchChart" in chartlib.__all__
     assert "GrayscaleStepChart" in chartlib.__all__
+    assert "RegistrationMarkerChart" in chartlib.__all__
     assert "SiemensStarChart" in chartlib.__all__
     assert "SlantedEdgeChart" in chartlib.__all__
     assert chartlib.CheckerboardChart is CheckerboardChart
@@ -32,6 +35,7 @@ def test_chartlib_top_level_exports_builtin_chart_classes() -> None:
     assert chartlib.ColorPatchChart is ColorPatchChart
     assert chartlib.DeadLeavesPatchChart is DeadLeavesPatchChart
     assert chartlib.GrayscaleStepChart is GrayscaleStepChart
+    assert chartlib.RegistrationMarkerChart is RegistrationMarkerChart
     assert chartlib.SiemensStarChart is SiemensStarChart
     assert chartlib.SlantedEdgeChart is SlantedEdgeChart
 
@@ -42,5 +46,6 @@ def test_chartlib_charts_exports_builtin_chart_classes() -> None:
     assert ChartsColorPatchChart is ColorPatchChart
     assert ChartsDeadLeavesPatchChart is DeadLeavesPatchChart
     assert ChartsGrayscaleStepChart is GrayscaleStepChart
+    assert ChartsRegistrationMarkerChart is RegistrationMarkerChart
     assert ChartsSiemensStarChart is SiemensStarChart
     assert ChartsSlantedEdgeChart is SlantedEdgeChart
