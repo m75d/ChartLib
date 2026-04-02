@@ -1,4 +1,4 @@
-"""Minimal raster rendering for rectangle-, circle-, and slanted-edge charts."""
+"""Minimal raster rendering for rectangle-, circle-, slanted-edge, and Siemens-star charts."""
 
 from __future__ import annotations
 
@@ -143,5 +143,64 @@ def render_slanted_edge_region(
         region = image[chart_y:chart_y + chart_height, chart_x:chart_x + chart_width]
         region[:] = light
         region[dark_mask] = dark
+
+    return image
+
+
+def render_siemens_star(
+    canvas: CanvasSpec,
+    center_x: int,
+    center_y: int,
+    outer_radius: int,
+    num_sectors: int,
+    inner_radius: int = 0,
+    dark_value: int | float | tuple[int | float, ...] = 0,
+    light_value: int | float | tuple[int | float, ...] = 255,
+    background_value: int | float | tuple[int | float, ...] | None = None,
+    options: RenderOptions | None = None,
+) -> np.ndarray:
+    """Render an ideal Siemens star with alternating angular sectors."""
+
+    render_options = options or RenderOptions()
+    image = render_primitives(canvas=canvas, options=render_options)
+    dark = normalize_color(dark_value, canvas.channels, "dark_value")
+    light = normalize_color(light_value, canvas.channels, "light_value")
+    hole = normalize_color(
+        canvas.background if background_value is None else background_value,
+        canvas.channels,
+        "background_value",
+    )
+
+    y0 = max(0, center_y - outer_radius)
+    y1 = min(canvas.height, center_y + outer_radius)
+    x0 = max(0, center_x - outer_radius)
+    x1 = min(canvas.width, center_x + outer_radius)
+
+    yy, xx = np.ogrid[y0:y1, x0:x1]
+    x_centers = xx + 0.5 - center_x
+    y_centers = center_y - (yy + 0.5)
+    radius_squared = x_centers**2 + y_centers**2
+
+    outer_mask = radius_squared <= outer_radius**2
+    inner_mask = radius_squared < inner_radius**2 if inner_radius > 0 else np.zeros_like(outer_mask, dtype=bool)
+    annulus_mask = outer_mask & ~inner_mask
+
+    angles = np.mod(np.arctan2(y_centers, x_centers), 2.0 * np.pi)
+    sector_width = (2.0 * np.pi) / float(num_sectors)
+    sector_indices = np.floor(angles / sector_width).astype(np.int32)
+    dark_mask = annulus_mask & ((sector_indices % 2) == 0)
+    light_mask = annulus_mask & ((sector_indices % 2) == 1)
+
+    region = image[y0:y1, x0:x1]
+    if canvas.channels == 1:
+        region[dark_mask] = dark[0]
+        region[light_mask] = light[0]
+        if inner_radius > 0:
+            region[inner_mask] = hole[0]
+    else:
+        region[dark_mask] = dark
+        region[light_mask] = light
+        if inner_radius > 0:
+            region[inner_mask] = hole
 
     return image

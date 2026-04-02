@@ -4,6 +4,7 @@ from chartlib.annotations import AnnotationBundle
 from chartlib.charts.circle_grid import CircleGridChart
 from chartlib.charts.grayscale import GrayscaleStepChart
 from chartlib.charts.checkerboard import CheckerboardChart
+from chartlib.charts.siemens_star import SiemensStarChart
 from chartlib.charts.slanted_edge import SlantedEdgeChart
 from chartlib.specs import CanvasSpec, RenderOptions
 
@@ -13,6 +14,7 @@ __all__ = [
     "CircleGridChart",
     "CheckerboardChart",
     "GrayscaleStepChart",
+    "SiemensStarChart",
     "SlantedEdgeChart",
     "RenderOptions",
 ]
