@@ -7,7 +7,7 @@ from pathlib import Path
 
 import numpy as np
 
-from chartlib.annotations import AnnotationBundle
+from chartlib.annotations import AnnotationBundle, line_region, rectangle_region
 from chartlib.renderers.raster import render_siemens_star
 from chartlib.specs import CanvasSpec, RenderOptions
 from chartlib.utils.image import save_png
@@ -95,6 +95,9 @@ class SiemensStarChart:
 
     def get_annotations(self) -> AnnotationBundle:
         center_x, center_y = self._resolved_center()
+        star_x = center_x - self.outer_radius
+        star_y = center_y - self.outer_radius
+        star_size = 2 * self.outer_radius
 
         return AnnotationBundle(
             chart_type="siemens_star",
@@ -108,23 +111,28 @@ class SiemensStarChart:
             },
             regions={
                 "star": [
-                    {
-                        "center_x": center_x,
-                        "center_y": center_y,
-                        "outer_radius": self.outer_radius,
-                        "inner_radius": self.inner_radius,
-                        "num_sectors": self.num_sectors,
-                        "start_angle_degrees": 0.0,
-                    }
+                    rectangle_region(
+                        "circle_annulus",
+                        x=star_x,
+                        y=star_y,
+                        width=star_size,
+                        height=star_size,
+                        center_x=center_x,
+                        center_y=center_y,
+                        outer_radius=self.outer_radius,
+                        inner_radius=self.inner_radius,
+                        num_sectors=self.num_sectors,
+                        start_angle_degrees=0.0,
+                    )
                 ],
                 "boundary_ray": [
-                    {
-                        "x0": float(center_x),
-                        "y0": float(center_y),
-                        "x1": float(center_x + self.outer_radius),
-                        "y1": float(center_y),
-                        "angle_degrees": 0.0,
-                    }
+                    line_region(
+                        float(center_x),
+                        float(center_y),
+                        float(center_x + self.outer_radius),
+                        float(center_y),
+                        angle_degrees=0.0,
+                    )
                 ],
             },
         )

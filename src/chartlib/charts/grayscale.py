@@ -7,7 +7,7 @@ from pathlib import Path
 
 import numpy as np
 
-from chartlib.annotations import AnnotationBundle
+from chartlib.annotations import AnnotationBundle, rectangle_region
 from chartlib.renderers.raster import RasterRectangle, render_rectangles
 from chartlib.specs import CanvasSpec, RenderOptions
 from chartlib.utils.image import save_png
@@ -92,14 +92,15 @@ class GrayscaleStepChart:
             x, y = self._step_origin(index, origin_x, origin_y, step_width, step_height)
             centers.append((float(x + step_width / 2), float(y + step_height / 2)))
             regions.append(
-                {
-                    "index": index,
-                    "value": value,
-                    "x": x,
-                    "y": y,
-                    "width": step_width,
-                    "height": step_height,
-                }
+                rectangle_region(
+                    "rectangle",
+                    x=x,
+                    y=y,
+                    width=step_width,
+                    height=step_height,
+                    index=index,
+                    value=value,
+                )
             )
 
         return AnnotationBundle(

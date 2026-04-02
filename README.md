@@ -67,6 +67,11 @@ slanted.save("slanted-edge.png")
 - PNG export
 - pytest coverage for the implemented V1 slices
 
+## Annotation Structure
+
+`AnnotationBundle` remains the public annotation container.
+Where charts expose `regions`, the payloads now use common bounds fields: `type`, `x`, `y`, `width`, and `height`, while preserving chart-specific keys such as `steps`, `chart`, `edge`, and `star`.
+
 ## Slanted Edge Convention
 
 `SlantedEdgeChart` uses a single straight edge passing through the center of the chart rectangle.

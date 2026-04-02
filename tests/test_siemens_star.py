@@ -71,12 +71,29 @@ def test_siemens_star_annotations_and_save(tmp_path: Path) -> None:
     assert annotations.landmarks["center"] == [(80.0, 60.0)]
     assert annotations.landmarks["boundary_ray"] == [(80.0, 60.0), (110.0, 60.0)]
     assert annotations.regions["star"][0] == {
+        "type": "circle_annulus",
+        "x": 50,
+        "y": 30,
+        "width": 60,
+        "height": 60,
         "center_x": 80,
         "center_y": 60,
         "outer_radius": 30,
         "inner_radius": 10,
         "num_sectors": 12,
         "start_angle_degrees": 0.0,
+    }
+    assert annotations.regions["boundary_ray"][0] == {
+        "type": "line_segment",
+        "x": 80.0,
+        "y": 60.0,
+        "width": 30.0,
+        "height": 0.0,
+        "x0": 80.0,
+        "y0": 60.0,
+        "x1": 110.0,
+        "y1": 60.0,
+        "angle_degrees": 0.0,
     }
     assert image[60, 80] == 180
 
