@@ -7,6 +7,7 @@ The current repository state implements a small V1 foundation with these built-i
 - `CheckerboardChart`
 - `CircleGridChart`
 - `GrayscaleStepChart`
+- `SiemensStarChart`
 - `SlantedEdgeChart`
 
 ## Install
@@ -29,6 +30,7 @@ from chartlib import (
     CheckerboardChart,
     CircleGridChart,
     GrayscaleStepChart,
+    SiemensStarChart,
     SlantedEdgeChart,
 )
 
@@ -36,11 +38,13 @@ canvas = CanvasSpec(width=320, height=240, channels=1, background=255)
 checkerboard = CheckerboardChart(canvas=canvas, rows=4, cols=5, square_size=40)
 circle_grid = CircleGridChart(canvas=canvas, rows=3, cols=4, radius=10, spacing=30)
 steps = GrayscaleStepChart(canvas=canvas, steps=5, step_size=(20, 60))
+star = SiemensStarChart(canvas=canvas, outer_radius=90, num_sectors=32)
 slanted = SlantedEdgeChart(canvas=canvas, chart_size=(120, 80), edge_angle_degrees=5.0)
 
 image, annotations = checkerboard.render(return_annotations=True)
 circle_grid.save("circle-grid.png")
 steps.save("grayscale-step.png")
+star.save("siemens-star.png")
 slanted.save("slanted-edge.png")
 ```
 
@@ -55,8 +59,10 @@ slanted.save("slanted-edge.png")
 - `CheckerboardChart`
 - `CircleGridChart`
 - `GrayscaleStepChart`
+- `SiemensStarChart`
 - `SlantedEdgeChart`
 - structured annotations for corners, centers, and step regions
+- structured annotations for Siemens-star center and geometry
 - structured annotations for slanted-edge geometry
 - PNG export
 - pytest coverage for the implemented V1 slices
