@@ -7,6 +7,8 @@ from typing import TypeAlias
 
 
 RegionValue: TypeAlias = int | float | str | bool
+LandmarkValue: TypeAlias = list[tuple[float, float]] | dict[str, object]
+RegionGroupValue: TypeAlias = list[dict[str, object]] | dict[str, object]
 
 
 @dataclass(frozen=True)
@@ -84,5 +86,5 @@ class AnnotationBundle:
 
     chart_type: str
     image_size: tuple[int, int]
-    landmarks: dict[str, list[tuple[float, float]]] = field(default_factory=dict)
-    regions: dict[str, list[dict[str, object]]] = field(default_factory=dict)
+    landmarks: dict[str, LandmarkValue] = field(default_factory=dict)
+    regions: dict[str, RegionGroupValue] = field(default_factory=dict)
