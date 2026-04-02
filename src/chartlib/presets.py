@@ -147,7 +147,12 @@ class TE42LikePreset:
         marker_size = max(16, min(self.canvas.width, self.canvas.height) // 36)
         marker_offset = marker_size // 2 + min(margin_x, margin_y) // 2
         registration_markers = RegistrationMarkerChart(
-            canvas=CanvasSpec(width=self.canvas.width, height=self.canvas.height, channels=1, background=255),
+            canvas=CanvasSpec(
+                width=self.canvas.width,
+                height=self.canvas.height,
+                channels=1,
+                background=self.background_value,
+            ),
             marker_size=marker_size,
             marker_shape="cross",
             marker_positions=[
@@ -165,12 +170,12 @@ class TE42LikePreset:
         )
 
         return [
+            PlacedChart(name="registration_markers", chart=registration_markers, origin=(0, 0)),
             PlacedChart(name="grayscale", chart=grayscale, origin=(top_left_x, top_row_y)),
             PlacedChart(name="color_patches", chart=color_patches, origin=(right_x, top_row_y)),
             PlacedChart(name="slanted_edge_0", chart=slanted_edge, origin=(top_left_x, bottom_row_y)),
             PlacedChart(name="dead_leaves", chart=dead_leaves, origin=(middle_x, bottom_row_y)),
             PlacedChart(name="siemens_star_0", chart=siemens_star, origin=(right_x, bottom_row_y)),
-            PlacedChart(name="registration_markers", chart=registration_markers, origin=(0, 0)),
         ]
 
     def _background_rgb(self) -> tuple[int, int, int]:
