@@ -12,6 +12,7 @@ from chartlib import (
     RegistrationMarkerChart,
     SiemensStarChart,
     SlantedEdgeChart,
+    TE42LikePreset,
 )
 from chartlib.charts import CheckerboardChart as ChartsCheckerboardChart
 from chartlib.charts import CircleGridChart as ChartsCircleGridChart
@@ -36,6 +37,7 @@ def test_chartlib_top_level_exports_builtin_chart_classes() -> None:
     assert "RegistrationMarkerChart" in chartlib.__all__
     assert "SiemensStarChart" in chartlib.__all__
     assert "SlantedEdgeChart" in chartlib.__all__
+    assert "TE42LikePreset" in chartlib.__all__
     assert chartlib.CheckerboardChart is CheckerboardChart
     assert chartlib.CircleGridChart is CircleGridChart
     assert chartlib.CompositeChart is CompositeChart
@@ -46,6 +48,7 @@ def test_chartlib_top_level_exports_builtin_chart_classes() -> None:
     assert chartlib.RegistrationMarkerChart is RegistrationMarkerChart
     assert chartlib.SiemensStarChart is SiemensStarChart
     assert chartlib.SlantedEdgeChart is SlantedEdgeChart
+    assert chartlib.TE42LikePreset is TE42LikePreset
 
 
 def test_chartlib_charts_exports_builtin_chart_classes() -> None:

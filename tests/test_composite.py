@@ -38,6 +38,25 @@ def test_composite_places_multiple_child_chart_types() -> None:
     assert image[25, 95] == 0
 
 
+def test_composite_promotes_grayscale_child_into_rgb_canvas() -> None:
+    composite_canvas = CanvasSpec(width=120, height=80, channels=3, background=(128, 128, 128))
+    grayscale = GrayscaleStepChart(
+        canvas=CanvasSpec(width=40, height=20, channels=1, background=255),
+        steps=1,
+        step_size=(30, 10),
+        values=[64],
+    )
+    chart = CompositeChart(
+        canvas=composite_canvas,
+        elements=[PlacedChart(name="gray", chart=grayscale, origin=(20, 20))],
+    )
+
+    image = chart.render()
+
+    assert image.shape == (80, 120, 3)
+    assert tuple(image[30, 40]) == (64, 64, 64)
+
+
 def test_composite_uses_overwrite_order_for_overlap() -> None:
     composite_canvas = CanvasSpec(width=100, height=80, channels=1, background=255)
     first = GrayscaleStepChart(

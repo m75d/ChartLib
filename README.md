@@ -40,6 +40,7 @@ from chartlib import (
     RegistrationMarkerChart,
     SiemensStarChart,
     SlantedEdgeChart,
+    TE42LikePreset,
     PlacedChart,
 )
 
@@ -69,6 +70,12 @@ steps.save("grayscale-step.png")
 star.save("siemens-star.png")
 slanted.save("slanted-edge.png")
 composite.save("composite.png")
+
+te42_like = TE42LikePreset(
+    canvas=CanvasSpec(width=1280, height=720, channels=3, background=(128, 128, 128)),
+    seed=0,
+)
+te42_like.save("te42-like.png")
 ```
 
 ## Current Scope
@@ -94,6 +101,7 @@ composite.save("composite.png")
 - structured annotations for registration-marker centers and regions
 - structured annotations for Siemens-star center and geometry
 - structured annotations for slanted-edge geometry
+- `TE42LikePreset` composite built from existing chart blocks
 - PNG export
 - pytest coverage for the implemented V1 slices
 
