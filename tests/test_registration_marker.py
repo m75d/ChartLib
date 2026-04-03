@@ -81,6 +81,31 @@ def test_registration_marker_cross_supports_explicit_length_and_thickness() -> N
     assert annotations.regions["markers"][0]["cross_thickness"] == 3
 
 
+def test_registration_marker_quadrant_circle_shape_sanity() -> None:
+    canvas = CanvasSpec(width=100, height=80, channels=1, background=128)
+    chart = RegistrationMarkerChart(
+        canvas=canvas,
+        marker_size=20,
+        marker_shape="quadrant_circle",
+        marker_positions=[(20, 20)],
+        origin=(10, 10),
+        layout_size=(40, 40),
+        dark_value=0,
+        light_value=255,
+    )
+
+    image, annotations = chart.render(return_annotations=True)
+
+    assert image[26, 26] == 0
+    assert image[26, 34] == 255
+    assert image[34, 26] == 255
+    assert image[34, 34] == 0
+    assert image[30, 19] == 128
+    assert annotations.regions["markers"][0]["shape"] == "quadrant_circle"
+    assert annotations.regions["markers"][0]["width"] == 20
+    assert annotations.regions["markers"][0]["height"] == 20
+
+
 def test_registration_marker_annotations_and_save(tmp_path: Path) -> None:
     canvas = CanvasSpec(width=160, height=120, channels=1, background=255)
     chart = RegistrationMarkerChart(
@@ -154,7 +179,7 @@ def test_registration_marker_rejects_non_grayscale_canvas() -> None:
 def test_registration_marker_rejects_unsupported_shape() -> None:
     canvas = CanvasSpec(width=100, height=80, channels=1, background=255)
 
-    with pytest.raises(ValueError, match="marker_shape must be 'square' or 'cross'"):
+    with pytest.raises(ValueError, match="marker_shape must be 'square', 'cross', or 'quadrant_circle'"):
         RegistrationMarkerChart(
             canvas=canvas,
             marker_size=10,
@@ -179,6 +204,27 @@ def test_registration_marker_default_layout_is_deterministic() -> None:
     canvas = CanvasSpec(width=100, height=100, channels=1, background=255)
     chart_a = RegistrationMarkerChart(canvas=canvas, marker_size=10)
     chart_b = RegistrationMarkerChart(canvas=canvas, marker_size=10)
+
+    np.testing.assert_array_equal(chart_a.render(), chart_b.render())
+    assert chart_a.get_annotations() == chart_b.get_annotations()
+
+
+def test_registration_marker_quadrant_circle_default_layout_is_deterministic() -> None:
+    canvas = CanvasSpec(width=100, height=100, channels=1, background=200)
+    chart_a = RegistrationMarkerChart(
+        canvas=canvas,
+        marker_size=12,
+        marker_shape="quadrant_circle",
+        dark_value=0,
+        light_value=255,
+    )
+    chart_b = RegistrationMarkerChart(
+        canvas=canvas,
+        marker_size=12,
+        marker_shape="quadrant_circle",
+        dark_value=0,
+        light_value=255,
+    )
 
     np.testing.assert_array_equal(chart_a.render(), chart_b.render())
     assert chart_a.get_annotations() == chart_b.get_annotations()

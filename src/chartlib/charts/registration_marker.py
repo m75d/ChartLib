@@ -8,7 +8,11 @@ from pathlib import Path
 import numpy as np
 
 from chartlib.annotations import AnnotationBundle, rectangle_region
-from chartlib.renderers.raster import RasterRectangle, render_rectangles
+from chartlib.renderers.raster import (
+    RasterQuadrantCircle,
+    RasterRectangle,
+    render_primitives,
+)
 from chartlib.specs import CanvasSpec, RenderOptions
 from chartlib.utils.image import save_png
 from chartlib.utils.validation import validate_non_negative_int, validate_positive_int
@@ -35,8 +39,8 @@ class RegistrationMarkerChart:
 
         if self.canvas.channels != 1:
             raise ValueError("RegistrationMarkerChart requires a grayscale canvas with channels=1.")
-        if self.marker_shape not in ("square", "cross"):
-            raise ValueError("marker_shape must be 'square' or 'cross'.")
+        if self.marker_shape not in ("square", "cross", "quadrant_circle"):
+            raise ValueError("marker_shape must be 'square', 'cross', or 'quadrant_circle'.")
         if self.cross_length is not None:
             validate_positive_int(self.cross_length, "cross_length")
         if self.cross_thickness is not None:
@@ -63,9 +67,10 @@ class RegistrationMarkerChart:
         options: RenderOptions | None = None,
     ) -> np.ndarray | tuple[np.ndarray, AnnotationBundle]:
         render_options = options or RenderOptions()
-        image = render_rectangles(
+        image = render_primitives(
             canvas=self.canvas,
             rectangles=self._rectangles(),
+            quadrant_circles=self._quadrant_circles(),
             options=render_options,
         )
 
@@ -156,11 +161,33 @@ class RegistrationMarkerChart:
                         color=self.dark_value,
                     )
                 )
-            else:
+            elif self.marker_shape == "cross":
                 for rect in self._cross_rectangles(center_x, center_y):
                     rectangles.append(rect)
 
         return rectangles
+
+    def _quadrant_circles(self) -> list[RasterQuadrantCircle]:
+        if self.marker_shape != "quadrant_circle":
+            return []
+
+        layout_width, layout_height = self._resolved_layout_size()
+        origin_x, origin_y = self._resolved_origin(layout_width, layout_height)
+        circles: list[RasterQuadrantCircle] = []
+        radius = self.marker_size // 2
+
+        for local_x, local_y in self._resolved_marker_positions(layout_width, layout_height):
+            circles.append(
+                RasterQuadrantCircle(
+                    center_x=origin_x + local_x,
+                    center_y=origin_y + local_y,
+                    radius=radius,
+                    dark_color=self.dark_value,
+                    light_color=self.light_value,
+                )
+            )
+
+        return circles
 
     def _cross_rectangles(self, center_x: int, center_y: int) -> list[RasterRectangle]:
         thickness = self._resolved_cross_thickness()

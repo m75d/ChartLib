@@ -38,6 +38,20 @@ class RasterCircle:
         validate_positive_int(self.radius, "radius")
 
 
+@dataclass(frozen=True)
+class RasterQuadrantCircle:
+    """Circle split into alternating dark/light quadrants."""
+
+    center_x: int
+    center_y: int
+    radius: int
+    dark_color: int | float | tuple[int | float, ...]
+    light_color: int | float | tuple[int | float, ...]
+
+    def __post_init__(self) -> None:
+        validate_positive_int(self.radius, "radius")
+
+
 def render_rectangles(
     canvas: CanvasSpec,
     rectangles: list[RasterRectangle],
@@ -52,6 +66,7 @@ def render_primitives(
     canvas: CanvasSpec,
     rectangles: list[RasterRectangle] | None = None,
     circles: list[RasterCircle] | None = None,
+    quadrant_circles: list[RasterQuadrantCircle] | None = None,
     options: RenderOptions | None = None,
 ) -> np.ndarray:
     """Render a small set of filled primitives onto a NumPy image."""
@@ -61,6 +76,7 @@ def render_primitives(
     dtype = render_options.dtype
     rectangle_list = rectangles or []
     circle_list = circles or []
+    quadrant_circle_list = quadrant_circles or []
 
     if canvas.channels == 1:
         image = np.full((canvas.height, canvas.width), background[0], dtype=dtype)
@@ -93,6 +109,33 @@ def render_primitives(
             image[y0:y1, x0:x1][mask] = color[0]
         else:
             image[y0:y1, x0:x1][mask] = color
+
+    for circle in quadrant_circle_list:
+        dark = normalize_color(circle.dark_color, canvas.channels, "quadrant_circle.dark_color")
+        light = normalize_color(circle.light_color, canvas.channels, "quadrant_circle.light_color")
+        y0 = max(0, circle.center_y - circle.radius)
+        y1 = min(canvas.height, circle.center_y + circle.radius + 1)
+        x0 = max(0, circle.center_x - circle.radius)
+        x1 = min(canvas.width, circle.center_x + circle.radius + 1)
+
+        yy, xx = np.ogrid[y0:y1, x0:x1]
+        dx = xx - circle.center_x
+        dy = yy - circle.center_y
+        mask = dx**2 + dy**2 <= circle.radius**2
+        dark_mask = mask & (
+            ((dx < 0) & (dy < 0))
+            | ((dx >= 0) & (dy >= 0))
+        )
+        light_mask = mask & ~dark_mask
+
+        if canvas.channels == 1:
+            region = image[y0:y1, x0:x1]
+            region[dark_mask] = dark[0]
+            region[light_mask] = light[0]
+        else:
+            region = image[y0:y1, x0:x1]
+            region[dark_mask] = dark
+            region[light_mask] = light
 
     return image
 
