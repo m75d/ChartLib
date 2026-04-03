@@ -78,69 +78,115 @@ class TE42LikePreset:
     def _elements(self) -> list[PlacedChart]:
         margin_x, margin_y = self._outer_margin()
         gutter = self._gutter()
-        cell_width, cell_height = self._cell_size()
-
-        top_left_x = margin_x
         top_row_y = margin_y
-        middle_x = margin_x + cell_width + gutter
-        right_x = margin_x + 2 * (cell_width + gutter)
-        bottom_row_y = margin_y + cell_height + gutter
+        lower_row_y = margin_y + self.canvas.height // 4
 
-        grayscale_width = 2 * cell_width + gutter
+        dead_leaves_size = self._support_square_size()
+        color_patch_size = self._support_square_size()
+        grayscale_width = self._grayscale_width()
+        grayscale_height = self._grayscale_height()
+        primary_edge_width = self._slanted_edge_width()
+        primary_edge_height = self._slanted_edge_height()
+        primary_star_size = self._primary_star_size()
+        secondary_star_size = self._secondary_star_size()
+
+        left_support_x = margin_x
+        right_support_x = self.canvas.width - margin_x - color_patch_size
+        grayscale_x = (self.canvas.width - grayscale_width) // 2
+        left_edge_x = margin_x + self.canvas.width // 30
+        right_edge_x = self.canvas.width - margin_x - primary_edge_width - self.canvas.width // 30
+        primary_star_x = (self.canvas.width - primary_star_size) // 2
+        secondary_star_x = (self.canvas.width - secondary_star_size) // 2
+        primary_star_y = self.canvas.height - margin_y - primary_star_size
+        left_edge_y = lower_row_y + self.canvas.height // 18
+        right_edge_y = left_edge_y
+        secondary_star_y = lower_row_y
+
         grayscale_canvas = CanvasSpec(
             width=grayscale_width,
-            height=cell_height,
+            height=grayscale_height,
             channels=1,
             background=230,
         )
         grayscale = GrayscaleStepChart(
             canvas=grayscale_canvas,
             steps=8,
-            step_size=(max(1, (grayscale_width - 2 * self._inner_margin(cell_width, cell_height)) // 8), max(1, cell_height - 2 * self._inner_margin(cell_width, cell_height))),
+            step_size=(
+                max(1, (grayscale_width - 2 * self._inner_margin(grayscale_width, grayscale_height)) // 8),
+                max(1, grayscale_height - 2 * self._inner_margin(grayscale_width, grayscale_height)),
+            ),
             values=[0, 36, 72, 109, 146, 182, 219, 255],
             background_value=230,
         )
 
         color_patches = ColorPatchChart(
-            canvas=CanvasSpec(width=cell_width, height=cell_height, channels=3, background=self._background_rgb()),
+            canvas=CanvasSpec(
+                width=color_patch_size,
+                height=color_patch_size,
+                channels=3,
+                background=self._background_rgb(),
+            ),
             rows=2,
             cols=3,
             patch_size=(
-                max(1, (cell_width - 2 * self._inner_margin(cell_width, cell_height)) // 3),
-                max(1, (cell_height - 2 * self._inner_margin(cell_width, cell_height)) // 2),
+                max(1, color_patch_size // 3),
+                max(1, color_patch_size // 2),
             ),
             labels=["black", "white", "red", "green", "blue", "gray"],
         )
 
-        slanted_edge = SlantedEdgeChart(
-            canvas=CanvasSpec(width=cell_width, height=cell_height, channels=1, background=235),
+        slanted_edge_0 = SlantedEdgeChart(
+            canvas=CanvasSpec(width=primary_edge_width, height=primary_edge_height, channels=1, background=235),
             chart_size=(
-                max(1, cell_width - 2 * self._inner_margin(cell_width, cell_height)),
-                max(1, cell_height - 2 * self._inner_margin(cell_width, cell_height)),
+                max(1, primary_edge_width - 2 * self._inner_margin(primary_edge_width, primary_edge_height)),
+                max(1, primary_edge_height - 2 * self._inner_margin(primary_edge_width, primary_edge_height)),
             ),
             edge_angle_degrees=5.0,
             background_value=235,
         )
+        slanted_edge_1 = SlantedEdgeChart(
+            canvas=CanvasSpec(width=primary_edge_width, height=primary_edge_height, channels=1, background=235),
+            chart_size=(
+                max(1, primary_edge_width - 2 * self._inner_margin(primary_edge_width, primary_edge_height)),
+                max(1, primary_edge_height - 2 * self._inner_margin(primary_edge_width, primary_edge_height)),
+            ),
+            edge_angle_degrees=-5.0,
+            background_value=235,
+        )
 
         dead_leaves = DeadLeavesPatchChart(
-            canvas=CanvasSpec(width=cell_width, height=cell_height, channels=1, background=235),
+            canvas=CanvasSpec(width=dead_leaves_size, height=dead_leaves_size, channels=1, background=235),
             patch_size=(
-                max(1, cell_width - 2 * self._inner_margin(cell_width, cell_height)),
-                max(1, cell_height - 2 * self._inner_margin(cell_width, cell_height)),
+                max(1, dead_leaves_size - 2 * self._inner_margin(dead_leaves_size, dead_leaves_size)),
+                max(1, dead_leaves_size - 2 * self._inner_margin(dead_leaves_size, dead_leaves_size)),
             ),
             num_shapes=200,
-            radius_range=(4, max(5, min(cell_width, cell_height) // 8)),
+            radius_range=(4, max(5, dead_leaves_size // 8)),
             value_range=(24, 232),
             background_value=24,
             seed=self.seed,
         )
 
-        star_radius = max(16, min(cell_width, cell_height) // 2 - self._inner_margin(cell_width, cell_height))
-        siemens_star = SiemensStarChart(
-            canvas=CanvasSpec(width=cell_width, height=cell_height, channels=1, background=235),
-            outer_radius=star_radius,
+        primary_star_radius = max(
+            16,
+            primary_star_size // 2 - self._inner_margin(primary_star_size, primary_star_size),
+        )
+        secondary_star_radius = max(
+            16,
+            secondary_star_size // 2 - self._inner_margin(secondary_star_size, secondary_star_size),
+        )
+        siemens_star_0 = SiemensStarChart(
+            canvas=CanvasSpec(width=primary_star_size, height=primary_star_size, channels=1, background=235),
+            outer_radius=primary_star_radius,
             num_sectors=32,
-            inner_radius=max(0, star_radius // 8),
+            inner_radius=max(0, primary_star_radius // 8),
+            background_value=235,
+        )
+        siemens_star_1 = SiemensStarChart(
+            canvas=CanvasSpec(width=secondary_star_size, height=secondary_star_size, channels=1, background=235),
+            outer_radius=secondary_star_radius,
+            num_sectors=24,
+            inner_radius=max(0, secondary_star_radius // 10),
             background_value=235,
         )
 
@@ -171,11 +217,13 @@ class TE42LikePreset:
 
         return [
             PlacedChart(name="registration_markers", chart=registration_markers, origin=(0, 0)),
-            PlacedChart(name="grayscale", chart=grayscale, origin=(top_left_x, top_row_y)),
-            PlacedChart(name="color_patches", chart=color_patches, origin=(right_x, top_row_y)),
-            PlacedChart(name="slanted_edge_0", chart=slanted_edge, origin=(top_left_x, bottom_row_y)),
-            PlacedChart(name="dead_leaves", chart=dead_leaves, origin=(middle_x, bottom_row_y)),
-            PlacedChart(name="siemens_star_0", chart=siemens_star, origin=(right_x, bottom_row_y)),
+            PlacedChart(name="dead_leaves", chart=dead_leaves, origin=(left_support_x, top_row_y)),
+            PlacedChart(name="grayscale", chart=grayscale, origin=(grayscale_x, top_row_y)),
+            PlacedChart(name="color_patches", chart=color_patches, origin=(right_support_x, top_row_y)),
+            PlacedChart(name="siemens_star_1", chart=siemens_star_1, origin=(secondary_star_x, secondary_star_y)),
+            PlacedChart(name="slanted_edge_0", chart=slanted_edge_0, origin=(left_edge_x, left_edge_y)),
+            PlacedChart(name="slanted_edge_1", chart=slanted_edge_1, origin=(right_edge_x, right_edge_y)),
+            PlacedChart(name="siemens_star_0", chart=siemens_star_0, origin=(primary_star_x, primary_star_y)),
         ]
 
     def _background_rgb(self) -> tuple[int, int, int]:
@@ -200,3 +248,24 @@ class TE42LikePreset:
 
     def _inner_margin(self, cell_width: int, cell_height: int) -> int:
         return max(10, min(cell_width, cell_height) // 12)
+
+    def _support_square_size(self) -> int:
+        return max(120, min(self.canvas.width, self.canvas.height) // 5)
+
+    def _grayscale_width(self) -> int:
+        return max(240, self.canvas.width * 11 // 20)
+
+    def _grayscale_height(self) -> int:
+        return max(80, self.canvas.height // 8)
+
+    def _slanted_edge_width(self) -> int:
+        return max(180, self.canvas.width // 5)
+
+    def _slanted_edge_height(self) -> int:
+        return max(220, self.canvas.height * 7 // 20)
+
+    def _primary_star_size(self) -> int:
+        return max(200, min(self.canvas.width, self.canvas.height) // 3)
+
+    def _secondary_star_size(self) -> int:
+        return max(140, min(self.canvas.width, self.canvas.height) // 5)
