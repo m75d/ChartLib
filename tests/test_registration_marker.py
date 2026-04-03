@@ -56,6 +56,31 @@ def test_registration_marker_cross_shape_sanity() -> None:
     assert image[21, 26] == 255
 
 
+def test_registration_marker_cross_supports_explicit_length_and_thickness() -> None:
+    canvas = CanvasSpec(width=120, height=100, channels=1, background=255)
+    chart = RegistrationMarkerChart(
+        canvas=canvas,
+        marker_size=8,
+        marker_shape="cross",
+        cross_length=21,
+        cross_thickness=3,
+        marker_positions=[(20, 20)],
+        origin=(10, 10),
+        layout_size=(40, 40),
+    )
+
+    image, annotations = chart.render(return_annotations=True)
+
+    assert image[30, 30] == 0
+    assert image[30, 20] == 0
+    assert image[20, 30] == 0
+    assert image[26, 26] == 255
+    assert annotations.regions["markers"][0]["width"] == 21
+    assert annotations.regions["markers"][0]["height"] == 21
+    assert annotations.regions["markers"][0]["cross_length"] == 21
+    assert annotations.regions["markers"][0]["cross_thickness"] == 3
+
+
 def test_registration_marker_annotations_and_save(tmp_path: Path) -> None:
     canvas = CanvasSpec(width=160, height=120, channels=1, background=255)
     chart = RegistrationMarkerChart(
@@ -134,6 +159,19 @@ def test_registration_marker_rejects_unsupported_shape() -> None:
             canvas=canvas,
             marker_size=10,
             marker_shape="circle",
+        )
+
+
+def test_registration_marker_rejects_cross_thickness_larger_than_length() -> None:
+    canvas = CanvasSpec(width=100, height=80, channels=1, background=255)
+
+    with pytest.raises(ValueError, match="cross_thickness must not exceed cross_length"):
+        RegistrationMarkerChart(
+            canvas=canvas,
+            marker_size=10,
+            marker_shape="cross",
+            cross_length=5,
+            cross_thickness=6,
         )
 
 

@@ -27,6 +27,8 @@ class RegistrationMarkerChart:
     dark_value: int = 0
     light_value: int = 255
     background_value: int | None = None
+    cross_length: int | None = None
+    cross_thickness: int | None = None
 
     def __post_init__(self) -> None:
         validate_positive_int(self.marker_size, "marker_size")
@@ -35,6 +37,10 @@ class RegistrationMarkerChart:
             raise ValueError("RegistrationMarkerChart requires a grayscale canvas with channels=1.")
         if self.marker_shape not in ("square", "cross"):
             raise ValueError("marker_shape must be 'square' or 'cross'.")
+        if self.cross_length is not None:
+            validate_positive_int(self.cross_length, "cross_length")
+        if self.cross_thickness is not None:
+            validate_positive_int(self.cross_thickness, "cross_thickness")
         validate_non_negative_int(self.dark_value, "dark_value")
         validate_non_negative_int(self.light_value, "light_value")
         if self.dark_value > 255 or self.light_value > 255:
@@ -48,6 +54,8 @@ class RegistrationMarkerChart:
         origin_x, origin_y = self._resolved_origin(layout_width, layout_height)
         if origin_x + layout_width > self.canvas.width or origin_y + layout_height > self.canvas.height:
             raise ValueError("Registration marker layout does not fit inside the canvas.")
+        if self.marker_shape == "cross" and self._resolved_cross_thickness() > self._resolved_cross_length():
+            raise ValueError("cross_thickness must not exceed cross_length.")
 
     def render(
         self,
@@ -91,6 +99,15 @@ class RegistrationMarkerChart:
             center_y = origin_y + local_y
             x, y, width, height = self._marker_bounds(center_x, center_y)
             centers.append((float(center_x), float(center_y)))
+            extras = {
+                "index": index,
+                "shape": self.marker_shape,
+                "center_x": center_x,
+                "center_y": center_y,
+            }
+            if self.marker_shape == "cross":
+                extras["cross_length"] = self._resolved_cross_length()
+                extras["cross_thickness"] = self._resolved_cross_thickness()
             regions.append(
                 rectangle_region(
                     "rectangle",
@@ -98,10 +115,7 @@ class RegistrationMarkerChart:
                     y=y,
                     width=width,
                     height=height,
-                    index=index,
-                    shape=self.marker_shape,
-                    center_x=center_x,
-                    center_y=center_y,
+                    **extras,
                 )
             )
 
@@ -149,7 +163,7 @@ class RegistrationMarkerChart:
         return rectangles
 
     def _cross_rectangles(self, center_x: int, center_y: int) -> list[RasterRectangle]:
-        thickness = self._cross_thickness()
+        thickness = self._resolved_cross_thickness()
         x, y, width, height = self._marker_bounds(center_x, center_y)
         horizontal_y = center_y - thickness // 2
         vertical_x = center_x - thickness // 2
@@ -170,13 +184,22 @@ class RegistrationMarkerChart:
             ),
         ]
 
-    def _cross_thickness(self) -> int:
-        return max(1, self.marker_size // 4)
+    def _resolved_cross_length(self) -> int:
+        return self.cross_length if self.cross_length is not None else self.marker_size
+
+    def _resolved_cross_thickness(self) -> int:
+        return self.cross_thickness if self.cross_thickness is not None else max(1, self.marker_size // 4)
 
     def _marker_bounds(self, center_x: int, center_y: int) -> tuple[int, int, int, int]:
-        x = center_x - self.marker_size // 2
-        y = center_y - self.marker_size // 2
-        return (x, y, self.marker_size, self.marker_size)
+        marker_extent = self._marker_extent()
+        x = center_x - marker_extent // 2
+        y = center_y - marker_extent // 2
+        return (x, y, marker_extent, marker_extent)
+
+    def _marker_extent(self) -> int:
+        if self.marker_shape == "cross":
+            return self._resolved_cross_length()
+        return self.marker_size
 
     def _resolved_origin(self, layout_width: int, layout_height: int) -> tuple[int, int]:
         if self.origin is not None:
@@ -200,10 +223,11 @@ class RegistrationMarkerChart:
             self._resolved_marker_positions(layout_width, layout_height)
             return layout_width, layout_height
 
-        default_width = 3 * self.marker_size
-        default_height = 3 * self.marker_size
+        marker_extent = self._marker_extent()
+        default_width = 3 * marker_extent
+        default_height = 3 * marker_extent
         if self.marker_positions is None:
-            return (default_width, default_height)
+            return (3 * marker_extent, 3 * marker_extent)
 
         max_x = 0
         max_y = 0
@@ -231,10 +255,11 @@ class RegistrationMarkerChart:
         return resolved
 
     def _default_marker_positions(self, layout_width: int, layout_height: int) -> list[tuple[int, int]]:
-        start_x = self.marker_size // 2
-        start_y = self.marker_size // 2
-        end_x = layout_width - (self.marker_size - self.marker_size // 2)
-        end_y = layout_height - (self.marker_size - self.marker_size // 2)
+        marker_extent = self._marker_extent()
+        start_x = marker_extent // 2
+        start_y = marker_extent // 2
+        end_x = layout_width - (marker_extent - marker_extent // 2)
+        end_y = layout_height - (marker_extent - marker_extent // 2)
         return [
             (start_x, start_y),
             (end_x, start_y),
