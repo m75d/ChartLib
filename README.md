@@ -41,6 +41,7 @@ from chartlib import (
     SiemensStarChart,
     SlantedEdgeChart,
     TE42LikePreset,
+    TE42Preset,
     PlacedChart,
 )
 
@@ -76,6 +77,12 @@ te42_like = TE42LikePreset(
     seed=0,
 )
 te42_like.save("te42-like.png")
+
+te42 = TE42Preset(
+    canvas=CanvasSpec(width=1280, height=720, channels=3, background=(128, 128, 128)),
+    seed=0,
+)
+te42.save("te42.png")
 ```
 
 ## Current Scope
@@ -102,6 +109,7 @@ te42_like.save("te42-like.png")
 - structured annotations for Siemens-star center and geometry
 - structured annotations for slanted-edge geometry
 - `TE42LikePreset` composite built from existing chart blocks
+- `TE42Preset` replication-oriented composite based on TE42 structure
 - PNG export
 - pytest coverage for the implemented V1 slices
 
