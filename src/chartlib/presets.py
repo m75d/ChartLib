@@ -392,7 +392,7 @@ class TE42Preset:
         margin_y = max(24, self.canvas.height // 28)
         content_width = self.canvas.width - 2 * margin_x
         content_height = self.canvas.height - 2 * margin_y
-        upper_band_height = content_height * 32 // 100
+        upper_band_height = content_height * 31 // 100
         lower_band_height = content_height - upper_band_height
         grayscale_width = content_width * 38 // 100
         color_width = content_width * 32 // 100
@@ -402,9 +402,10 @@ class TE42Preset:
         color_height = max(200, upper_band_height + lower_band_height // 12)
         slanted_width = max(160, content_width * 16 // 100)
         slanted_height = max(70, content_height * 12 // 100)
-        full_star_size = max(140, min(content_width, content_height) * 23 // 100)
-        medium_star_size = max(96, full_star_size * 55 // 100)
-        small_star_size = max(72, full_star_size * 45 // 100)
+        full_star_size = max(180, min(content_width, content_height) * 24 // 100)
+        corner_star_size = max(150, full_star_size * 84 // 100)
+        side_star_size = max(108, full_star_size * 52 // 100)
+        small_star_size = max(72, full_star_size * 34 // 100)
 
         grayscale_x = margin_x + texture_width // 4
         grayscale_y = margin_y + self.canvas.height // 40
@@ -416,17 +417,24 @@ class TE42Preset:
         low_texture_y = texture_y + dead_leaves_size + self.canvas.height // 36
 
         center_x = self.canvas.width // 2
-        center_y = margin_y + upper_band_height + lower_band_height * 46 // 100
+        center_y = margin_y + upper_band_height + lower_band_height * 42 // 100
         large_star_origin = (center_x - full_star_size // 2, center_y - full_star_size // 2)
-        upper_small_star_y = margin_y + upper_band_height + self.canvas.height // 24
-        lower_small_star_y = self.canvas.height - margin_y - small_star_size - self.canvas.height // 18
-        left_corner_star_origin = (margin_x + self.canvas.width // 18, margin_y + upper_band_height + self.canvas.height // 18)
-        right_corner_star_origin = (
-            self.canvas.width - margin_x - medium_star_size - self.canvas.width // 18,
-            margin_y + upper_band_height + self.canvas.height // 18,
+        upper_small_star_y = margin_y + upper_band_height - small_star_size // 3
+        side_star_y = center_y - side_star_size // 2
+        lower_small_star_y = self.canvas.height - margin_y - small_star_size - self.canvas.height // 14
+        corner_inset_x = max(12, self.canvas.width // 80)
+        corner_inset_y = max(12, self.canvas.height // 80)
+        top_left_corner_star_origin = (corner_inset_x, corner_inset_y)
+        top_right_corner_star_origin = (self.canvas.width - corner_inset_x - corner_star_size, corner_inset_y)
+        bottom_left_corner_star_origin = (corner_inset_x, self.canvas.height - corner_inset_y - corner_star_size)
+        bottom_right_corner_star_origin = (
+            self.canvas.width - corner_inset_x - corner_star_size,
+            self.canvas.height - corner_inset_y - corner_star_size,
         )
+        left_side_star_origin = (margin_x, side_star_y)
+        right_side_star_origin = (self.canvas.width - margin_x - side_star_size, side_star_y)
 
-        slanted_top_y = margin_y + upper_band_height + self.canvas.height // 22
+        slanted_top_y = margin_y + upper_band_height + self.canvas.height // 16
         slanted_bottom_y = self.canvas.height - margin_y - slanted_height - self.canvas.height // 18
         left_edge_x = margin_x + self.canvas.width // 7
         right_edge_x = self.canvas.width - margin_x - slanted_width - self.canvas.width // 7
@@ -438,12 +446,14 @@ class TE42Preset:
             PlacedChart(name="dead_leaves_0", chart=self._dead_leaves_block(dead_leaves_size, contrast="high"), origin=(texture_x, texture_y)),
             PlacedChart(name="dead_leaves_1", chart=self._dead_leaves_block(dead_leaves_size * 9 // 10, contrast="low"), origin=(low_texture_x, low_texture_y)),
             PlacedChart(name="siemens_star_0", chart=self._siemens_star(full_star_size, sectors=32, contrast="high"), origin=large_star_origin),
-            PlacedChart(name="siemens_star_1", chart=self._siemens_star(medium_star_size, sectors=32, contrast="high"), origin=left_corner_star_origin),
-            PlacedChart(name="siemens_star_2", chart=self._siemens_star(medium_star_size, sectors=32, contrast="high"), origin=right_corner_star_origin),
-            PlacedChart(name="siemens_star_3", chart=self._siemens_star(small_star_size, sectors=24, contrast="high"), origin=(center_x - small_star_size - self.canvas.width // 16, upper_small_star_y)),
-            PlacedChart(name="siemens_star_4", chart=self._siemens_star(small_star_size, sectors=24, contrast="high"), origin=(center_x + self.canvas.width // 16, upper_small_star_y)),
-            PlacedChart(name="siemens_star_5", chart=self._siemens_star(small_star_size, sectors=24, contrast="low"), origin=(center_x - small_star_size - self.canvas.width // 16, lower_small_star_y)),
-            PlacedChart(name="siemens_star_6", chart=self._siemens_star(small_star_size, sectors=24, contrast="low"), origin=(center_x + self.canvas.width // 16, lower_small_star_y)),
+            PlacedChart(name="siemens_star_1", chart=self._siemens_star(corner_star_size, sectors=32, contrast="high"), origin=top_left_corner_star_origin),
+            PlacedChart(name="siemens_star_2", chart=self._siemens_star(corner_star_size, sectors=32, contrast="high"), origin=top_right_corner_star_origin),
+            PlacedChart(name="siemens_star_3", chart=self._siemens_star(corner_star_size, sectors=32, contrast="high"), origin=bottom_left_corner_star_origin),
+            PlacedChart(name="siemens_star_4", chart=self._siemens_star(corner_star_size, sectors=32, contrast="high"), origin=bottom_right_corner_star_origin),
+            PlacedChart(name="siemens_star_5", chart=self._siemens_star(side_star_size, sectors=28, contrast="high"), origin=left_side_star_origin),
+            PlacedChart(name="siemens_star_6", chart=self._siemens_star(side_star_size, sectors=28, contrast="high"), origin=right_side_star_origin),
+            PlacedChart(name="siemens_star_7", chart=self._siemens_star(small_star_size, sectors=24, contrast="low"), origin=(center_x - small_star_size - self.canvas.width // 15, upper_small_star_y)),
+            PlacedChart(name="siemens_star_8", chart=self._siemens_star(small_star_size, sectors=24, contrast="low"), origin=(center_x + self.canvas.width // 15, upper_small_star_y)),
             PlacedChart(name="slanted_edge_0", chart=self._slanted_edge_block(slanted_width, slanted_height, vertical_bias=True, contrast="high"), origin=(left_edge_x, slanted_top_y)),
             PlacedChart(name="slanted_edge_1", chart=self._slanted_edge_block(slanted_width, slanted_height, vertical_bias=False, contrast="low"), origin=(right_edge_x, slanted_top_y)),
             PlacedChart(name="slanted_edge_2", chart=self._slanted_edge_block(slanted_width, slanted_height, vertical_bias=False, contrast="high"), origin=(left_edge_x, slanted_bottom_y)),
@@ -531,6 +541,10 @@ class TE42Preset:
         for y in (marker_size, self.canvas.height - marker_size):
             for x in np.linspace(offset_x, self.canvas.width - offset_x, 5):
                 positions.append((int(round(x)), y))
+        side_offset_y = max(marker_size * 2, self.canvas.height // 6)
+        for x in (marker_size, self.canvas.width - marker_size):
+            for y in np.linspace(side_offset_y, self.canvas.height - side_offset_y, 4):
+                positions.append((x, int(round(y))))
 
         return RegistrationMarkerChart(
             canvas=CanvasSpec(width=self.canvas.width, height=self.canvas.height, channels=1, background=128),
