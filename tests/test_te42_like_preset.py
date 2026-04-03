@@ -64,6 +64,30 @@ def test_te42_like_preset_layout_regions_are_distinct() -> None:
     assert slanted_edge_region["x"] < dead_leaves_region["x"] < star_region["x"]
 
 
+def test_te42_like_preset_keeps_blocks_visible_over_marker_layer() -> None:
+    preset = TE42LikePreset(
+        canvas=CanvasSpec(width=960, height=540, channels=3, background=(128, 128, 128)),
+        seed=3,
+    )
+
+    image, annotations = preset.render(return_annotations=True)
+    background = np.array([128, 128, 128], dtype=np.uint8)
+    star_region = annotations.regions["siemens_star_0"]["star"][0]
+    dead_leaves_region = annotations.regions["dead_leaves"]["patch"][0]
+
+    star_slice = image[
+        int(star_region["y"]):int(star_region["y"] + star_region["height"]),
+        int(star_region["x"]):int(star_region["x"] + star_region["width"]),
+    ]
+    dead_leaves_slice = image[
+        int(dead_leaves_region["y"]):int(dead_leaves_region["y"] + dead_leaves_region["height"]),
+        int(dead_leaves_region["x"]):int(dead_leaves_region["x"] + dead_leaves_region["width"]),
+    ]
+
+    assert np.any(np.any(star_slice != background, axis=2))
+    assert np.any(np.any(dead_leaves_slice != background, axis=2))
+
+
 def test_te42_like_preset_save_returns_annotations(tmp_path: Path) -> None:
     preset = TE42LikePreset(
         canvas=CanvasSpec(width=960, height=540, channels=3, background=(128, 128, 128)),
