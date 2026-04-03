@@ -77,12 +77,11 @@ class TE42LikePreset:
 
     def _elements(self) -> list[PlacedChart]:
         margin_x, margin_y = self._outer_margin()
-        gutter = self._gutter()
-        top_row_y = margin_y
-        lower_row_y = margin_y + self.canvas.height // 4
+        top_band_y = margin_y
+        support_y = margin_y + self._grayscale_height() + self._gutter() // 2
 
-        dead_leaves_size = self._support_square_size()
-        color_patch_size = self._support_square_size()
+        dead_leaves_size = self._dead_leaves_size()
+        color_patch_width, color_patch_height = self._color_patch_size()
         grayscale_width = self._grayscale_width()
         grayscale_height = self._grayscale_height()
         primary_edge_width = self._slanted_edge_width()
@@ -91,16 +90,16 @@ class TE42LikePreset:
         secondary_star_size = self._secondary_star_size()
 
         left_support_x = margin_x
-        right_support_x = self.canvas.width - margin_x - color_patch_size
+        right_support_x = self.canvas.width - margin_x - color_patch_width
         grayscale_x = (self.canvas.width - grayscale_width) // 2
         left_edge_x = margin_x + self.canvas.width // 30
         right_edge_x = self.canvas.width - margin_x - primary_edge_width - self.canvas.width // 30
         primary_star_x = (self.canvas.width - primary_star_size) // 2
         secondary_star_x = (self.canvas.width - secondary_star_size) // 2
         primary_star_y = self.canvas.height - margin_y - primary_star_size
-        left_edge_y = lower_row_y + self.canvas.height // 18
+        left_edge_y = self.canvas.height - margin_y - primary_edge_height - self.canvas.height // 14
         right_edge_y = left_edge_y
-        secondary_star_y = lower_row_y
+        secondary_star_y = support_y + dead_leaves_size - secondary_star_size // 3
 
         grayscale_canvas = CanvasSpec(
             width=grayscale_width,
@@ -121,18 +120,19 @@ class TE42LikePreset:
 
         color_patches = ColorPatchChart(
             canvas=CanvasSpec(
-                width=color_patch_size,
-                height=color_patch_size,
+                width=color_patch_width,
+                height=color_patch_height,
                 channels=3,
                 background=self._background_rgb(),
             ),
-            rows=2,
-            cols=3,
+            rows=4,
+            cols=6,
             patch_size=(
-                max(1, color_patch_size // 3),
-                max(1, color_patch_size // 2),
+                color_patch_width // 6,
+                color_patch_height // 4,
             ),
-            labels=["black", "white", "red", "green", "blue", "gray"],
+            colors=self._color_patch_palette(),
+            labels=self._color_patch_labels(),
         )
 
         slanted_edge_0 = SlantedEdgeChart(
@@ -160,7 +160,7 @@ class TE42LikePreset:
                 max(1, dead_leaves_size - 2 * self._inner_margin(dead_leaves_size, dead_leaves_size)),
                 max(1, dead_leaves_size - 2 * self._inner_margin(dead_leaves_size, dead_leaves_size)),
             ),
-            num_shapes=200,
+            num_shapes=280,
             radius_range=(4, max(5, dead_leaves_size // 8)),
             value_range=(24, 232),
             background_value=24,
@@ -217,9 +217,13 @@ class TE42LikePreset:
 
         return [
             PlacedChart(name="registration_markers", chart=registration_markers, origin=(0, 0)),
-            PlacedChart(name="dead_leaves", chart=dead_leaves, origin=(left_support_x, top_row_y)),
-            PlacedChart(name="grayscale", chart=grayscale, origin=(grayscale_x, top_row_y)),
-            PlacedChart(name="color_patches", chart=color_patches, origin=(right_support_x, top_row_y)),
+            PlacedChart(name="grayscale", chart=grayscale, origin=(grayscale_x, top_band_y)),
+            PlacedChart(name="dead_leaves", chart=dead_leaves, origin=(left_support_x, support_y)),
+            PlacedChart(
+                name="color_patches",
+                chart=color_patches,
+                origin=(right_support_x, support_y + self.canvas.height // 36),
+            ),
             PlacedChart(name="siemens_star_1", chart=siemens_star_1, origin=(secondary_star_x, secondary_star_y)),
             PlacedChart(name="slanted_edge_0", chart=slanted_edge_0, origin=(left_edge_x, left_edge_y)),
             PlacedChart(name="slanted_edge_1", chart=slanted_edge_1, origin=(right_edge_x, right_edge_y)),
@@ -249,8 +253,15 @@ class TE42LikePreset:
     def _inner_margin(self, cell_width: int, cell_height: int) -> int:
         return max(10, min(cell_width, cell_height) // 12)
 
-    def _support_square_size(self) -> int:
-        return max(120, min(self.canvas.width, self.canvas.height) // 5)
+    def _dead_leaves_size(self) -> int:
+        return max(220, min(self.canvas.width, self.canvas.height) * 3 // 8)
+
+    def _color_patch_size(self) -> tuple[int, int]:
+        patch_width = max(288, self.canvas.width // 4)
+        patch_height = max(192, self.canvas.height // 4)
+        patch_width -= patch_width % 6
+        patch_height -= patch_height % 4
+        return (patch_width, patch_height)
 
     def _grayscale_width(self) -> int:
         return max(240, self.canvas.width * 11 // 20)
@@ -269,3 +280,59 @@ class TE42LikePreset:
 
     def _secondary_star_size(self) -> int:
         return max(140, min(self.canvas.width, self.canvas.height) // 5)
+
+    def _color_patch_palette(self) -> list[tuple[int, int, int]]:
+        return [
+            (16, 16, 16),
+            (48, 48, 48),
+            (96, 96, 96),
+            (160, 160, 160),
+            (224, 224, 224),
+            (245, 245, 245),
+            (160, 24, 32),
+            (32, 128, 48),
+            (24, 72, 176),
+            (208, 176, 32),
+            (176, 56, 152),
+            (32, 160, 176),
+            (96, 32, 24),
+            (96, 80, 24),
+            (40, 96, 40),
+            (32, 96, 96),
+            (48, 48, 112),
+            (112, 48, 96),
+            (214, 176, 140),
+            (186, 138, 102),
+            (224, 128, 48),
+            (176, 96, 32),
+            (112, 160, 208),
+            (200, 208, 216),
+        ]
+
+    def _color_patch_labels(self) -> list[str]:
+        return [
+            "black",
+            "dark_gray",
+            "gray",
+            "light_gray",
+            "highlight_gray",
+            "white",
+            "deep_red",
+            "green",
+            "blue",
+            "yellow",
+            "magenta",
+            "cyan",
+            "brown",
+            "olive",
+            "dark_green",
+            "teal",
+            "navy",
+            "purple",
+            "skin_light",
+            "skin_mid",
+            "orange",
+            "amber",
+            "sky",
+            "cool_gray",
+        ]

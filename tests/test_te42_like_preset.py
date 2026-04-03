@@ -35,6 +35,7 @@ def test_te42_like_preset_annotations_include_expected_groups() -> None:
     assert "siemens_star_1" in annotations.landmarks
     assert "dead_leaves" in annotations.regions
     assert "registration_markers" in annotations.regions
+    assert len(annotations.regions["color_patches"]["patches"]) == 24
 
 
 def test_te42_like_preset_is_deterministic_for_fixed_seed() -> None:
@@ -64,9 +65,10 @@ def test_te42_like_preset_layout_regions_are_distinct() -> None:
     star_region = annotations.regions["siemens_star_0"]["star"][0]
 
     assert dead_leaves_region["x"] < grayscale_region["x"] < color_patch_region["x"]
-    assert grayscale_region["x"] < color_patch_region["x"]
+    assert dead_leaves_region["width"] > color_patch_region["width"]
     assert grayscale_region["y"] < secondary_star_region["y"] < star_region["y"]
     assert slanted_edge_region["x"] < star_region["x"] < slanted_edge_region_1["x"]
+    assert color_patch_region["y"] > grayscale_region["y"]
 
 
 def test_te42_like_preset_keeps_blocks_visible_over_marker_layer() -> None:
@@ -77,10 +79,15 @@ def test_te42_like_preset_keeps_blocks_visible_over_marker_layer() -> None:
 
     image, annotations = preset.render(return_annotations=True)
     background = np.array([128, 128, 128], dtype=np.uint8)
+    color_region = annotations.regions["color_patches"]["patches"][0]
     star_region = annotations.regions["siemens_star_0"]["star"][0]
     star_region_1 = annotations.regions["siemens_star_1"]["star"][0]
     dead_leaves_region = annotations.regions["dead_leaves"]["patch"][0]
 
+    color_slice = image[
+        int(color_region["y"]):int(color_region["y"] + color_region["height"]),
+        int(color_region["x"]):int(color_region["x"] + color_region["width"]),
+    ]
     star_slice = image[
         int(star_region["y"]):int(star_region["y"] + star_region["height"]),
         int(star_region["x"]):int(star_region["x"] + star_region["width"]),
@@ -94,6 +101,7 @@ def test_te42_like_preset_keeps_blocks_visible_over_marker_layer() -> None:
         int(dead_leaves_region["x"]):int(dead_leaves_region["x"] + dead_leaves_region["width"]),
     ]
 
+    assert np.any(np.any(color_slice != background, axis=2))
     assert np.any(np.any(star_slice != background, axis=2))
     assert np.any(np.any(star_slice_1 != background, axis=2))
     assert np.any(np.any(dead_leaves_slice != background, axis=2))
