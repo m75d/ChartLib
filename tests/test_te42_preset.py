@@ -93,6 +93,20 @@ def test_te42_preset_circular_family_uses_revised_size_hierarchy() -> None:
     assert center_star["width"] > corner_star["width"] > side_star["width"] > small_upper_star["width"]
 
 
+def test_te42_preset_center_star_matches_refined_role() -> None:
+    preset = TE42Preset(
+        canvas=CanvasSpec(width=1280, height=720, channels=3, background=(128, 128, 128)),
+        seed=3,
+    )
+
+    annotations = preset.get_annotations()
+    center_star = annotations.regions["siemens_star_0"]["star"][0]
+    corner_star = annotations.regions["siemens_star_1"]["star"][0]
+
+    assert center_star["num_sectors"] == 72
+    assert center_star["width"] >= int(corner_star["width"] * 1.15)
+
+
 def test_te42_preset_save_returns_annotations(tmp_path: Path) -> None:
     preset = TE42Preset(
         canvas=CanvasSpec(width=1280, height=720, channels=3, background=(128, 128, 128)),

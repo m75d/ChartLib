@@ -402,7 +402,7 @@ class TE42Preset:
         color_height = max(200, upper_band_height + lower_band_height // 12)
         slanted_width = max(160, content_width * 16 // 100)
         slanted_height = max(70, content_height * 12 // 100)
-        full_star_size = max(180, min(content_width, content_height) * 24 // 100)
+        full_star_size = max(220, min(content_width, content_height) * 32 // 100)
         corner_star_size = max(150, full_star_size * 84 // 100)
         side_star_size = max(108, full_star_size * 52 // 100)
         small_star_size = max(72, full_star_size * 34 // 100)
@@ -417,7 +417,7 @@ class TE42Preset:
         low_texture_y = texture_y + dead_leaves_size + self.canvas.height // 36
 
         center_x = self.canvas.width // 2
-        center_y = margin_y + upper_band_height + lower_band_height * 42 // 100
+        center_y = margin_y + upper_band_height + lower_band_height * 40 // 100
         large_star_origin = (center_x - full_star_size // 2, center_y - full_star_size // 2)
         upper_small_star_y = margin_y + upper_band_height - small_star_size // 3
         side_star_y = center_y - side_star_size // 2
@@ -445,7 +445,7 @@ class TE42Preset:
             PlacedChart(name="color_patches", chart=self._color_patch_block(color_width, color_height), origin=(color_x, color_y)),
             PlacedChart(name="dead_leaves_0", chart=self._dead_leaves_block(dead_leaves_size, contrast="high"), origin=(texture_x, texture_y)),
             PlacedChart(name="dead_leaves_1", chart=self._dead_leaves_block(dead_leaves_size * 9 // 10, contrast="low"), origin=(low_texture_x, low_texture_y)),
-            PlacedChart(name="siemens_star_0", chart=self._siemens_star(full_star_size, sectors=32, contrast="high"), origin=large_star_origin),
+            PlacedChart(name="siemens_star_0", chart=self._siemens_star(full_star_size, sectors=72, contrast="high"), origin=large_star_origin),
             PlacedChart(name="siemens_star_1", chart=self._siemens_star(corner_star_size, sectors=32, contrast="high"), origin=top_left_corner_star_origin),
             PlacedChart(name="siemens_star_2", chart=self._siemens_star(corner_star_size, sectors=32, contrast="high"), origin=top_right_corner_star_origin),
             PlacedChart(name="siemens_star_3", chart=self._siemens_star(corner_star_size, sectors=32, contrast="high"), origin=bottom_left_corner_star_origin),
