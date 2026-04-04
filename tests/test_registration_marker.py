@@ -81,6 +81,54 @@ def test_registration_marker_cross_supports_explicit_length_and_thickness() -> N
     assert annotations.regions["markers"][0]["cross_thickness"] == 3
 
 
+def test_registration_marker_corner_shape_sanity() -> None:
+    canvas = CanvasSpec(width=120, height=100, channels=1, background=255)
+    chart = RegistrationMarkerChart(
+        canvas=canvas,
+        marker_size=8,
+        marker_shape="corner",
+        cross_length=21,
+        cross_thickness=3,
+        corner_orientation="top_left",
+        marker_positions=[(20, 20)],
+        origin=(10, 10),
+        layout_size=(40, 40),
+    )
+
+    image, annotations = chart.render(return_annotations=True)
+
+    assert image[20, 20] == 0
+    assert image[30, 20] == 0
+    assert image[20, 30] == 0
+    assert image[30, 30] == 255
+    assert annotations.regions["markers"][0]["shape"] == "corner"
+    assert annotations.regions["markers"][0]["corner_orientation"] == "top_left"
+    assert annotations.regions["markers"][0]["cross_length"] == 21
+    assert annotations.regions["markers"][0]["cross_thickness"] == 3
+
+
+def test_registration_marker_corner_orientation_changes_quadrant() -> None:
+    canvas = CanvasSpec(width=120, height=100, channels=1, background=255)
+    chart = RegistrationMarkerChart(
+        canvas=canvas,
+        marker_size=8,
+        marker_shape="corner",
+        cross_length=21,
+        cross_thickness=3,
+        corner_orientation="bottom_right",
+        marker_positions=[(20, 20)],
+        origin=(10, 10),
+        layout_size=(40, 40),
+    )
+
+    image = chart.render()
+
+    assert image[40, 40] == 0
+    assert image[30, 40] == 0
+    assert image[40, 30] == 0
+    assert image[30, 30] == 255
+
+
 def test_registration_marker_quadrant_circle_shape_sanity() -> None:
     canvas = CanvasSpec(width=100, height=80, channels=1, background=128)
     chart = RegistrationMarkerChart(
@@ -179,7 +227,7 @@ def test_registration_marker_rejects_non_grayscale_canvas() -> None:
 def test_registration_marker_rejects_unsupported_shape() -> None:
     canvas = CanvasSpec(width=100, height=80, channels=1, background=255)
 
-    with pytest.raises(ValueError, match="marker_shape must be 'square', 'cross', or 'quadrant_circle'"):
+    with pytest.raises(ValueError, match="marker_shape must be 'square', 'cross', 'quadrant_circle', or 'corner'"):
         RegistrationMarkerChart(
             canvas=canvas,
             marker_size=10,
@@ -197,6 +245,21 @@ def test_registration_marker_rejects_cross_thickness_larger_than_length() -> Non
             marker_shape="cross",
             cross_length=5,
             cross_thickness=6,
+        )
+
+
+def test_registration_marker_rejects_invalid_corner_orientation() -> None:
+    canvas = CanvasSpec(width=100, height=80, channels=1, background=255)
+
+    with pytest.raises(
+        ValueError,
+        match="corner_orientation must be 'top_left', 'top_right', 'bottom_left', or 'bottom_right'",
+    ):
+        RegistrationMarkerChart(
+            canvas=canvas,
+            marker_size=10,
+            marker_shape="corner",
+            corner_orientation="left_top",
         )
 
 

@@ -33,14 +33,19 @@ class RegistrationMarkerChart:
     background_value: int | None = None
     cross_length: int | None = None
     cross_thickness: int | None = None
+    corner_orientation: str = "top_left"
 
     def __post_init__(self) -> None:
         validate_positive_int(self.marker_size, "marker_size")
 
         if self.canvas.channels != 1:
             raise ValueError("RegistrationMarkerChart requires a grayscale canvas with channels=1.")
-        if self.marker_shape not in ("square", "cross", "quadrant_circle"):
-            raise ValueError("marker_shape must be 'square', 'cross', or 'quadrant_circle'.")
+        if self.marker_shape not in ("square", "cross", "quadrant_circle", "corner"):
+            raise ValueError("marker_shape must be 'square', 'cross', 'quadrant_circle', or 'corner'.")
+        if self.corner_orientation not in ("top_left", "top_right", "bottom_left", "bottom_right"):
+            raise ValueError(
+                "corner_orientation must be 'top_left', 'top_right', 'bottom_left', or 'bottom_right'."
+            )
         if self.cross_length is not None:
             validate_positive_int(self.cross_length, "cross_length")
         if self.cross_thickness is not None:
@@ -58,7 +63,7 @@ class RegistrationMarkerChart:
         origin_x, origin_y = self._resolved_origin(layout_width, layout_height)
         if origin_x + layout_width > self.canvas.width or origin_y + layout_height > self.canvas.height:
             raise ValueError("Registration marker layout does not fit inside the canvas.")
-        if self.marker_shape == "cross" and self._resolved_cross_thickness() > self._resolved_cross_length():
+        if self.marker_shape in ("cross", "corner") and self._resolved_linear_marker_thickness() > self._resolved_linear_marker_length():
             raise ValueError("cross_thickness must not exceed cross_length.")
 
     def render(
@@ -110,9 +115,11 @@ class RegistrationMarkerChart:
                 "center_x": center_x,
                 "center_y": center_y,
             }
-            if self.marker_shape == "cross":
-                extras["cross_length"] = self._resolved_cross_length()
-                extras["cross_thickness"] = self._resolved_cross_thickness()
+            if self.marker_shape in ("cross", "corner"):
+                extras["cross_length"] = self._resolved_linear_marker_length()
+                extras["cross_thickness"] = self._resolved_linear_marker_thickness()
+            if self.marker_shape == "corner":
+                extras["corner_orientation"] = self.corner_orientation
             regions.append(
                 rectangle_region(
                     "rectangle",
@@ -164,6 +171,9 @@ class RegistrationMarkerChart:
             elif self.marker_shape == "cross":
                 for rect in self._cross_rectangles(center_x, center_y):
                     rectangles.append(rect)
+            elif self.marker_shape == "corner":
+                for rect in self._corner_rectangles(center_x, center_y):
+                    rectangles.append(rect)
 
         return rectangles
 
@@ -190,7 +200,7 @@ class RegistrationMarkerChart:
         return circles
 
     def _cross_rectangles(self, center_x: int, center_y: int) -> list[RasterRectangle]:
-        thickness = self._resolved_cross_thickness()
+        thickness = self._resolved_linear_marker_thickness()
         x, y, width, height = self._marker_bounds(center_x, center_y)
         horizontal_y = center_y - thickness // 2
         vertical_x = center_x - thickness // 2
@@ -211,10 +221,41 @@ class RegistrationMarkerChart:
             ),
         ]
 
-    def _resolved_cross_length(self) -> int:
+    def _corner_rectangles(self, center_x: int, center_y: int) -> list[RasterRectangle]:
+        thickness = self._resolved_linear_marker_thickness()
+        x, y, width, height = self._marker_bounds(center_x, center_y)
+
+        if self.corner_orientation == "top_left":
+            horizontal = RasterRectangle(x=x, y=y, width=width, height=thickness, color=self.dark_value)
+            vertical = RasterRectangle(x=x, y=y, width=thickness, height=height, color=self.dark_value)
+        elif self.corner_orientation == "top_right":
+            horizontal = RasterRectangle(x=x, y=y, width=width, height=thickness, color=self.dark_value)
+            vertical = RasterRectangle(x=x + width - thickness, y=y, width=thickness, height=height, color=self.dark_value)
+        elif self.corner_orientation == "bottom_left":
+            horizontal = RasterRectangle(x=x, y=y + height - thickness, width=width, height=thickness, color=self.dark_value)
+            vertical = RasterRectangle(x=x, y=y, width=thickness, height=height, color=self.dark_value)
+        else:
+            horizontal = RasterRectangle(
+                x=x,
+                y=y + height - thickness,
+                width=width,
+                height=thickness,
+                color=self.dark_value,
+            )
+            vertical = RasterRectangle(
+                x=x + width - thickness,
+                y=y,
+                width=thickness,
+                height=height,
+                color=self.dark_value,
+            )
+
+        return [horizontal, vertical]
+
+    def _resolved_linear_marker_length(self) -> int:
         return self.cross_length if self.cross_length is not None else self.marker_size
 
-    def _resolved_cross_thickness(self) -> int:
+    def _resolved_linear_marker_thickness(self) -> int:
         return self.cross_thickness if self.cross_thickness is not None else max(1, self.marker_size // 4)
 
     def _marker_bounds(self, center_x: int, center_y: int) -> tuple[int, int, int, int]:
@@ -224,8 +265,8 @@ class RegistrationMarkerChart:
         return (x, y, marker_extent, marker_extent)
 
     def _marker_extent(self) -> int:
-        if self.marker_shape == "cross":
-            return self._resolved_cross_length()
+        if self.marker_shape in ("cross", "corner"):
+            return self._resolved_linear_marker_length()
         return self.marker_size
 
     def _resolved_origin(self, layout_width: int, layout_height: int) -> tuple[int, int]:
