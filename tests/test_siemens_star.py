@@ -82,6 +82,7 @@ def test_siemens_star_annotations_and_save(tmp_path: Path) -> None:
         "inner_radius": 10,
         "num_sectors": 12,
         "start_angle_degrees": 0.0,
+        "sweep_angle_degrees": 360.0,
     }
     assert annotations.regions["boundary_ray"][0] == {
         "type": "line_segment",
@@ -96,6 +97,31 @@ def test_siemens_star_annotations_and_save(tmp_path: Path) -> None:
         "angle_degrees": 0.0,
     }
     assert image[60, 80] == 180
+
+
+def test_siemens_star_can_render_partial_sector_span() -> None:
+    canvas = CanvasSpec(width=140, height=140, channels=1, background=200)
+    chart = SiemensStarChart(
+        canvas=canvas,
+        outer_radius=40,
+        num_sectors=8,
+        center=(70, 70),
+        start_angle_degrees=0.0,
+        sweep_angle_degrees=180.0,
+    )
+
+    image, annotations = chart.render(return_annotations=True)
+
+    x_right, y_right = _sample_point((70, 70), 20, 10.0)
+    x_upper_left, y_upper_left = _sample_point((70, 70), 20, 135.0)
+    x_left, y_left = _sample_point((70, 70), 20, 190.0)
+
+    assert image[y_right, x_right] == 0
+    assert image[y_upper_left, x_upper_left] == 255
+    assert image[y_left, x_left] == 200
+    assert annotations.regions["star"][0]["start_angle_degrees"] == 0.0
+    assert annotations.regions["star"][0]["sweep_angle_degrees"] == 180.0
+    assert annotations.regions["boundary_ray"][0]["angle_degrees"] == 0.0
 
 
 def test_siemens_star_uses_centered_placement_by_default() -> None:
@@ -141,6 +167,14 @@ def test_siemens_star_rejects_invalid_radius_and_sector_values() -> None:
             canvas=canvas,
             outer_radius=20,
             num_sectors=0,
+        )
+
+    with pytest.raises(ValueError, match="sweep_angle_degrees must be in the range \\(0, 360\\]"):
+        SiemensStarChart(
+            canvas=canvas,
+            outer_radius=20,
+            num_sectors=8,
+            sweep_angle_degrees=0.0,
         )
 
 

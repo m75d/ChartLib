@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+import math
 
 import numpy as np
 
@@ -23,6 +24,8 @@ class SiemensStarChart:
     num_sectors: int
     center: tuple[int, int] | None = None
     inner_radius: int = 0
+    start_angle_degrees: float = 0.0
+    sweep_angle_degrees: float = 360.0
     dark_value: int = 0
     light_value: int = 255
     background_value: int | None = None
@@ -33,6 +36,16 @@ class SiemensStarChart:
         validate_non_negative_int(self.inner_radius, "inner_radius")
         validate_non_negative_int(self.dark_value, "dark_value")
         validate_non_negative_int(self.light_value, "light_value")
+        if not isinstance(self.start_angle_degrees, (int, float)) or isinstance(self.start_angle_degrees, bool):
+            raise ValueError("start_angle_degrees must be a finite number.")
+        if not isinstance(self.sweep_angle_degrees, (int, float)) or isinstance(self.sweep_angle_degrees, bool):
+            raise ValueError("sweep_angle_degrees must be a finite number.")
+        if not math.isfinite(float(self.start_angle_degrees)):
+            raise ValueError("start_angle_degrees must be a finite number.")
+        if not math.isfinite(float(self.sweep_angle_degrees)):
+            raise ValueError("sweep_angle_degrees must be a finite number.")
+        if float(self.sweep_angle_degrees) <= 0.0 or float(self.sweep_angle_degrees) > 360.0:
+            raise ValueError("sweep_angle_degrees must be in the range (0, 360].")
 
         if self.background_value is not None:
             validate_non_negative_int(self.background_value, "background_value")
@@ -68,6 +81,8 @@ class SiemensStarChart:
             outer_radius=self.outer_radius,
             num_sectors=self.num_sectors,
             inner_radius=self.inner_radius,
+            start_angle_degrees=float(self.start_angle_degrees),
+            sweep_angle_degrees=float(self.sweep_angle_degrees),
             dark_value=self.dark_value,
             light_value=self.light_value,
             background_value=self.background_value,
@@ -106,7 +121,10 @@ class SiemensStarChart:
                 "center": [(float(center_x), float(center_y))],
                 "boundary_ray": [
                     (float(center_x), float(center_y)),
-                    (float(center_x + self.outer_radius), float(center_y)),
+                    (
+                        float(center_x + self.outer_radius * math.cos(math.radians(float(self.start_angle_degrees)))),
+                        float(center_y - self.outer_radius * math.sin(math.radians(float(self.start_angle_degrees)))),
+                    ),
                 ],
             },
             regions={
@@ -122,16 +140,17 @@ class SiemensStarChart:
                         outer_radius=self.outer_radius,
                         inner_radius=self.inner_radius,
                         num_sectors=self.num_sectors,
-                        start_angle_degrees=0.0,
+                        start_angle_degrees=float(self.start_angle_degrees),
+                        sweep_angle_degrees=float(self.sweep_angle_degrees),
                     )
                 ],
                 "boundary_ray": [
                     line_region(
                         float(center_x),
                         float(center_y),
-                        float(center_x + self.outer_radius),
-                        float(center_y),
-                        angle_degrees=0.0,
+                        float(center_x + self.outer_radius * math.cos(math.radians(float(self.start_angle_degrees)))),
+                        float(center_y - self.outer_radius * math.sin(math.radians(float(self.start_angle_degrees)))),
+                        angle_degrees=float(self.start_angle_degrees),
                     )
                 ],
             },

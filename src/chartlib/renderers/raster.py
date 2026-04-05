@@ -197,6 +197,8 @@ def render_siemens_star(
     outer_radius: int,
     num_sectors: int,
     inner_radius: int = 0,
+    start_angle_degrees: float = 0.0,
+    sweep_angle_degrees: float = 360.0,
     dark_value: int | float | tuple[int | float, ...] = 0,
     light_value: int | float | tuple[int | float, ...] = 255,
     background_value: int | float | tuple[int | float, ...] | None = None,
@@ -229,10 +231,15 @@ def render_siemens_star(
     annulus_mask = outer_mask & ~inner_mask
 
     angles = np.mod(np.arctan2(y_centers, x_centers), 2.0 * np.pi)
+    start_radians = np.deg2rad(start_angle_degrees)
+    sweep_radians = np.deg2rad(sweep_angle_degrees)
+    relative_angles = np.mod(angles - start_radians, 2.0 * np.pi)
+    angular_mask = relative_angles < sweep_radians if sweep_angle_degrees < 360.0 else np.ones_like(annulus_mask, dtype=bool)
+    visible_mask = annulus_mask & angular_mask
     sector_width = (2.0 * np.pi) / float(num_sectors)
-    sector_indices = np.floor(angles / sector_width).astype(np.int32)
-    dark_mask = annulus_mask & ((sector_indices % 2) == 0)
-    light_mask = annulus_mask & ((sector_indices % 2) == 1)
+    sector_indices = np.floor(relative_angles / sector_width).astype(np.int32)
+    dark_mask = visible_mask & ((sector_indices % 2) == 0)
+    light_mask = visible_mask & ((sector_indices % 2) == 1)
 
     region = image[y0:y1, x0:x1]
     if canvas.channels == 1:
